@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from "prop-types";
 import Blaze from 'meteor/gadicc:blaze-react-component';
 
 export default class LoginButtons extends React.Component {
@@ -12,7 +13,7 @@ export default class LoginButtons extends React.Component {
 }
 
 LoginButtons.propTypes = {
-  align: React.PropTypes.string,
+  align: PropTypes.string,
 }
 
 LoginButtons.defaultProps = {
