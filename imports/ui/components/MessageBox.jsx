@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import PropTypes from "prop-types";
 import styled from "styled-components";
 
 import Suggestions from "./MessageSuggestions";
@@ -55,6 +56,12 @@ const SendButton = styled.input`
 `;
 
 class MessageBox extends Component {
+  static propTypes = {
+    onSend: PropTypes.func,
+    onSuggestionClicked: PropTypes.func,
+    isRecordingPassword: PropTypes.bool
+  };
+
   render() {
     return (
       <MessageBoxAndSuggestions>
@@ -63,7 +70,7 @@ class MessageBox extends Component {
           onSuggestionClicked={this.props.onSuggestionClicked}
         />
         <MessageBoxWrapper onSubmit={this.props.onSend}>
-          <MessageInput type={`text`} placeholder={`Message`} value={this.props.message} onChange={this.props.onChange} />
+          <MessageInput type={this.props.isRecordingPassword ? `password` : `text`} placeholder={`Message`} value={this.props.message} onChange={this.props.onChange} />
           <SendButton type={`submit`} value={``}/>
         </MessageBoxWrapper>
       </MessageBoxAndSuggestions>
