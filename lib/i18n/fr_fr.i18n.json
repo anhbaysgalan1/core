@@ -1,0 +1,18 @@
+{
+  "MESSAGE_BOX_PLACEHOLDER": "Message",
+  "SUGGESTION_I_AM_MEMBER": "Je suis un étudiant",
+  "SUGGESTION_I_AM_NEWCOMER": "Je suis nouveau",
+  "STUDENT": "étudiant",
+  "NEWCOMER": "nouveau",
+  "JINA_ERROR_SOMETHING_WENT_WRONG": "Oups, quelque chose s'est mal passé. {$err}.",
+  "JINA_ERROR_PASSWORD_TRY_AGAIN": "Essayons encore une fois ! Quel est ton mot de passe ?",
+  "JINA_ERROR_JINACORE": "Je devrais me connecter à JinaCore à ce stade. Cela n'a pas encore été implémenté, donc je ne suis qu'un robot bête et inutile.",
+  "JINA_ERROR_USER_NOT_FOUND": "Désolé, mais l'utilisateur ${userName} n'existe pas. Essaie à nouveau.",
+  "JINA_GREETING": "Bonjour, jeune padawan ! Qui es-tu ?",
+  "JINA_WELCOME": "Bienvenue, {$name} !",
+  "JINA_LOGIN_USERNAME_PROMPT": "Super ! Quel est ton pseudo ?",
+  "JINA_LOGIN_PASSWORD_PROMPT": "Merci, {$userName}. Quel est ton mot de passe ?",
+  "JINA_REGISTRATION_USERNAME_PROMPT": "Bienvenue sur Undermind ! Quel pseudo veux-tu utiliser ?",
+  "JINA_REGISTRATION_PASSWORD_PROMPT": "On y arrive ! Maintenant, quel mot de passe veux-tu utiliser ?",
+  "JINA_REGISTRATION_EMAIL_PROMPT": "Merci poto. Quelle est ton adresse email ? Pas de spam, promis."
+}

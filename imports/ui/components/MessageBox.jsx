@@ -49,6 +49,8 @@ const SendButton = styled.input`
   right: .7rem;
   bottom: 1.16rem;
   
+  padding: 0;
+  
   font-family: "FontAwesome";
   font-size: 1rem;
   color: white; 

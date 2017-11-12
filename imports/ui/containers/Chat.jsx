@@ -14,7 +14,7 @@ class Chat extends Component {
       conversation: [
         { sender: "jina", text: i18n.__("JINA_GREETING") }
       ],
-      suggestions: ["I'm a student", "I'm a newcomer"],
+      suggestions: [i18n.__("SUGGESTION_I_AM_MEMBER"), i18n.__("SUGGESTION_I_AM_NEWCOMER")],
       typedMessage: "",
       authenticating: false,
       registering: false,
@@ -52,17 +52,24 @@ class Chat extends Component {
     // Push message to conversation
     conversation.push({ sender: "me", text: typedMessage });
 
+
+    if (typedMessage.includes(i18n.__("STUDENT"))) {
+      this.startLoginScript();
+    } else if (typedMessage.includes(i18n.__("NEWCOMER"))) {
+      this.startSignUpScript();
+    }
+
     // If user is authenticating and has typed password, attempt to log in
     if (this.state.authenticating && userIsTypingPassword) {
       Meteor.loginWithPassword(this.state.userName, this.state.typedMessage, (err) => {
         if (err) {
-          this.sendJinaResponse(`Oops, something went wrong: ${err}`);
+          this.sendJinaResponse(i18n.__("JINA_ERROR_SOMETHING_WENT_WRONG", { err }));
           
           // Retry password input
-          this.sendJinaResponse(`Let's try one more time. What's your password?`);
+          this.sendJinaResponse(i18n.__("JINA_ERROR_PASSWORD_TRY_AGAIN"));
         } else {
           // Greet user
-          this.sendJinaResponse(`Welcome, ${Meteor.user().username}!`, {
+          this.sendJinaResponse(i18n.__("JINA_WELCOME", { name: Meteor.user().username }), {
             noDelay: true
           });
 
@@ -71,7 +78,7 @@ class Chat extends Component {
             authenticating: false
           }, () => {
             // Should connect to JinaCore here
-            this.sendJinaResponse(`I should connect to JinaCore here. This is not implemented yet, so I'm a dumb and useless robot.`);
+            this.sendJinaResponse(i18n.__("JINA_ERROR_JINACORE"));
           });
         }
       });
@@ -84,10 +91,10 @@ class Chat extends Component {
         password: this.state.typedMessage
       }, (err) => {
         if (err) {
-          this.sendJinaResponse(`Oops, something went wrong: ${err}`);
+          this.sendJinaResponse(i18n.__("JINA_ERROR_SOMETHING_WENT_WRONG", { err }));
         } else {
           // Greet new user
-          this.sendJinaResponse(`Welcome, ${Meteor.user().username}!`, {
+          this.sendJinaResponse(i18n.__("JINA_WELCOME", { name: Meteor.user().username }), {
             noDelay: true
           });
 
@@ -95,7 +102,7 @@ class Chat extends Component {
           this.setState({
             registering: false
           }, () => {
-            this.sendJinaResponse(`I should connect to JinaCore here. This is not implemented yet, so I'm a dumb and useless robot.`);
+            this.sendJinaResponse(i18n.__("JINA_ERROR_JINACORE"));
           });
         }
       });
@@ -107,10 +114,10 @@ class Chat extends Component {
       Meteor.call("user/doesUserExist", typedMessage, (error, result) => {
         if (!error && result) {
           this.setState({ userName: typedMessage }, () => {
-            this.sendJinaResponse(`Thanks, ${this.state.userName}. What's your password?`);
+            this.sendJinaResponse(i18n.__("JINA_LOGIN_PASSWORD_PROMPT", { userName: this.state.userName }));
           });
         } else {
-          this.sendJinaResponse(`Sorry, but user ${typedMessage} doesn't exist. Try again.`);
+          this.sendJinaResponse(i18n.__("JINA_ERROR_USER_NOT_FOUND", { userName: typedMessage }));
         }
       });
     }
@@ -122,13 +129,13 @@ class Chat extends Component {
     else if (this.state.registering && this.state.userName) {
       this.setState({ email: typedMessage });
 
-      this.sendJinaResponse(`We're getting there! Now, what password do you want to set?`);
+      this.sendJinaResponse(i18n.__("JINA_REGISTRATION_PASSWORD_PROMPT"));
     }
     // If user is registering
     else if (this.state.registering) {
       this.setState({ userName: typedMessage });
 
-      this.sendJinaResponse(`Thanks bruh. What's your email address? No spam, I swear.`);
+      this.sendJinaResponse(i18n.__("JINA_REGISRATION_EMAIL_PROMPT"));
     }
 
     this.setState({ conversation, typedMessage: "" });
@@ -167,11 +174,12 @@ class Chat extends Component {
    */
 
   startLoginScript() {
-    this.sendJinaResponse(`Nice! What's your username?`);
+    this.sendJinaResponse(i18n.__("JINA_LOGIN_USERNAME_PROMPT"));
 
     // Set `authenticating` state bool value to true and empty suggestions
     this.setState({
-      authenticating: true
+      authenticating: true,
+      suggestions: []
     });
   }
 
@@ -180,10 +188,11 @@ class Chat extends Component {
    */
 
   startSignUpScript() {
-    this.sendJinaResponse(`Welcome to Undermind! What username do you want to take?`);
+    this.sendJinaResponse(i18n.__("JINA_REGISTRATION_USERNAME_PROMPT"));
 
     this.setState({
-      registering: true
+      registering: true,
+      suggestions: []
     });
   }
 
@@ -196,12 +205,6 @@ class Chat extends Component {
   handleSuggestionClicked(suggestion) {
     this.setState({ typedMessage: suggestion, suggestions: [] }, () => {
       this.handleMessageSend();
-
-      if (suggestion.includes("student")) {
-        this.startLoginScript();
-      } else if (suggestion.includes("newcomer")) {
-        this.startSignUpScript();
-      }
     });
   }
 

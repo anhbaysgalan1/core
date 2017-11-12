@@ -1,4 +1,18 @@
 {
   "MESSAGE_BOX_PLACEHOLDER": "Message",
-  "JINA_GREETING": "Hello there! Who are you?"
+  "SUGGESTION_I_AM_MEMBER": "I'm a student",
+  "SUGGESTION_I_AM_NEWCOMER": "I'm a newcomer",
+  "STUDENT": "student",
+  "NEWCOMER": "newcomer",
+  "JINA_ERROR_SOMETHING_WENT_WRONG": "Oops, something went wrong. {$err}.",
+  "JINA_ERROR_PASSWORD_TRY_AGAIN": "Let's try one more time. What's your password?",
+  "JINA_ERROR_JINACORE": "I should connect to JinaCore here. This is not implemented yet, so I'm a dumb and useless robot.",
+  "JINA_ERROR_USER_NOT_FOUND": "Sorry, but user ${userName} doesn't exist. Try again.",
+  "JINA_GREETING": "Hello there! Who are you?",
+  "JINA_WELCOME": "Welcome, {$name}!",
+  "JINA_LOGIN_USERNAME_PROMPT": "Nice! What's your username?",
+  "JINA_LOGIN_PASSWORD_PROMPT": "Thanks, {$userName}. What's your password?",
+  "JINA_REGISTRATION_USERNAME_PROMPT": "Welcome to Undermind! What username do you want to take?",
+  "JINA_REGISTRATION_PASSWORD_PROMPT": "We're getting there! Now, what password do you want to set?",
+  "JINA_REGISTRATION_EMAIL_PROMPT": "Thanks bruh. What's your email address? No spam, I swear."
 }
