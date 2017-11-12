@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 import styled from "styled-components";
+import i18n from "meteor/universe:i18n";
 
 import Suggestions from "./MessageSuggestions";
 
@@ -70,7 +71,12 @@ class MessageBox extends Component {
           onSuggestionClicked={this.props.onSuggestionClicked}
         />
         <MessageBoxWrapper onSubmit={this.props.onSend}>
-          <MessageInput type={this.props.isRecordingPassword ? `password` : `text`} placeholder={`Message`} value={this.props.message} onChange={this.props.onChange} />
+          <MessageInput
+            type={this.props.isRecordingPassword ? `password` : `text`}
+            placeholder={i18n.__("MESSAGE_BOX_PLACEHOLDER")}
+            value={this.props.message}
+            onChange={this.props.onChange}
+          />
           <SendButton type={`submit`} value={``}/>
         </MessageBoxWrapper>
       </MessageBoxAndSuggestions>
