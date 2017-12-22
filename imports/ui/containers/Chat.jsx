@@ -135,7 +135,7 @@ class Chat extends Component {
     else if (this.state.registering) {
       this.setState({ userName: typedMessage });
 
-      this.sendJinaResponse(i18n.__("JINA_REGISRATION_EMAIL_PROMPT"));
+      this.sendJinaResponse(i18n.__("JINA_REGISTRATION_EMAIL_PROMPT"));
     }
 
     this.setState({ conversation, typedMessage: "" });
