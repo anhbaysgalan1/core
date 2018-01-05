@@ -4,6 +4,7 @@ import i18n from "meteor/universe:i18n";
 
 import "normalize.css";
 
+import Profile from "./Profile";
 import Chat from "./Chat";
 import About from '../pages/About.jsx';
 import NotFound from '../pages/NotFound.jsx';
@@ -26,6 +27,7 @@ export default class MainLayout extends React.Component {
       <Router>
         <Switch>
           <Route exact path='/' component={Chat} />
+          <Route path='/profile' component={Profile} />
           <Route path = '/about' component={About} />
           <Route component={NotFound} />
         </Switch>

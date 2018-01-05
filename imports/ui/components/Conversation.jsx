@@ -5,7 +5,7 @@ import MessageBubble from "./MessageBubble";
 
 const ConversationWrapper = styled.section`
   position: absolute;
-  top: 0;
+  //top: 0;
   left: 0;
   right: 0;
 
@@ -32,13 +32,23 @@ class Conversation extends Component {
   }
 
   render() {
-    const { messages } = this.props;
+    const { messages, suggestions, onSuggestionClicked } = this.props;
 
-    return (
+    console.log(messages);
+    console.log(suggestions);
+
+    return [
       <ConversationWrapper innerRef={wrapper => this.conversationWrapper = wrapper}>
         {messages.map(message => <MessageBubble message={message} />)}
+        {suggestions.map(suggestion =>
+          <MessageBubble
+            message={{ sender: "jina", text: suggestion}}
+            onSuggestionClicked={onSuggestionClicked}
+            suggestion
+          />
+        )}
       </ConversationWrapper>
-    )
+    ]
   }
 }
 

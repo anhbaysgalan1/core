@@ -4,7 +4,7 @@ import { Accounts } from "meteor/accounts-base";
 import i18n from "meteor/universe:i18n";
 import { compose } from "react-komposer";
 
-import { Conversation, MessageBox } from "../components";
+import { Conversation, MessageBox, Header } from "../components";
 
 class Chat extends Component {
   constructor() {
@@ -19,7 +19,7 @@ class Chat extends Component {
       authenticating: false,
       registering: false,
       userName: "",
-      email: ""
+      email: "",
     };
 
     this.handleMessageSend = this.handleMessageSend.bind(this);
@@ -199,11 +199,12 @@ class Chat extends Component {
   /**
    * Push clicked suggestion to state
    *
-   * @param suggestion
+   * @param event
+   * @param message
    */
 
-  handleSuggestionClicked(suggestion) {
-    this.setState({ typedMessage: suggestion, suggestions: [] }, () => {
+  handleSuggestionClicked(event, message) {
+    this.setState({ typedMessage: message.text, suggestions: [] }, () => {
       this.handleMessageSend();
     });
   }
@@ -213,14 +214,17 @@ class Chat extends Component {
       (this.state.registering && this.state.userName.length > 0 && this.state.email.length > 0);
 
     return [
-      <Conversation messages={this.state.conversation} />,
+      <Header {...this.props} />,
+      <Conversation
+        messages={this.state.conversation}
+        suggestions={this.state.suggestions}
+        onSuggestionClicked={this.handleSuggestionClicked}
+      />,
       <MessageBox
         message={this.state.typedMessage}
-        suggestions={this.state.suggestions}
         isRecordingPassword={userIsTypingPassword}
         onSend={this.handleMessageSend}
         onChange={this.handleMessageChange}
-        onSuggestionClicked={this.handleSuggestionClicked}
       />
     ];
   }

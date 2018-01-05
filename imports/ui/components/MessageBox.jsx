@@ -10,52 +10,82 @@ const MessageBoxAndSuggestions = styled.div`
   bottom: 0;
   
   width: 100%;
-  
-  background: #eee;
 `;
 
 const MessageBoxWrapper = styled.form`
   display: flex;
+  align-items: center;
+  
   width: 100%;
   
-  background: #eee;
-  border-top: 1px solid #bbb;
+  background: white;
   
-  padding: 1rem .5rem;
+  padding: .5rem .4rem;
 `;
 
 const MessageInput = styled.input`
-  background: white;
+  border: 1px solid #C7C7CC;
   
   color: black;
   
-  border: none;
   border-radius: 30px;
   outline: none;
 
   padding: .5rem 1rem;
+  margin-left: .5rem;
   
   width: 100%;
 `;
 
-const SendButton = styled.input`
+const RoundButton = styled.button`
   border: none;
   border-radius: 50%;
   
   width: 1.8rem;
   height: 1.8rem;
   
-  position: absolute;
-  right: .7rem;
-  bottom: 1.16rem;
+  ${props => props.right && `position: absolute;`}
+  ${props => props.right ? `right` : `left`}: .7rem;
+  bottom: .7rem;
   
   padding: 0;
   
-  font-family: "FontAwesome";
-  font-size: 1rem;
-  color: white; 
+  ${props => props.isOpen && `transform: rotate(-90deg);`}
   
-  background: #255F85;
+  transition: all 300ms ease;
+  
+  img {
+    width: 100%;
+    height: 100%;
+  }
+`;
+
+const MoreMenu = styled.nav`  
+  width: 3rem;
+  
+  margin-left: .4rem;
+  
+  background: white;
+  
+  button {
+    opacity: ${props => props.isOpen ? `1` : `0`};
+    
+    transition-property: opacity;
+    transition-duration: 300ms;
+    transition-timing-function: ease;
+    
+    margin: .3rem 0;
+  }
+  
+  //&.visible button {
+  //  opacity: 1;
+  //}
+  
+  ${Array(10).join(0).split(0).reverse().map((item, index) => `
+    button:nth-child(${index}) {
+      transition-delay: ${index * 100}ms;
+    }
+  `)}
 `;
 
 class MessageBox extends Component {
@@ -65,21 +95,59 @@ class MessageBox extends Component {
     isRecordingPassword: PropTypes.bool
   };
 
+  constructor() {
+    super();
+
+    this.state = {
+      isMoreMenuOpen: false
+    };
+
+    this.toggleMoreMenu = this.toggleMoreMenu.bind(this);
+  }
+
+  toggleMoreMenu(event) {
+    event.preventDefault();
+
+    console.log("Toggle more menu");
+
+    this.setState({ isMoreMenuOpen: !this.state.isMoreMenuOpen });
+  }
+
   render() {
     return (
       <MessageBoxAndSuggestions>
-        <Suggestions
-          suggestions={this.props.suggestions}
-          onSuggestionClicked={this.props.onSuggestionClicked}
-        />
+        {/*<Suggestions*/}
+          {/*suggestions={this.props.suggestions}*/}
+          {/*onSuggestionClicked={this.props.onSuggestionClicked}*/}
+        {/*/>*/}
+        <MoreMenu isOpen={this.state.isMoreMenuOpen}>
+          <RoundButton onClick={this.toggleMoreMenu}>
+            <img src={`/settings.svg`} />
+          </RoundButton>
+          <RoundButton onClick={this.toggleMoreMenu}>
+            <img src={`/saveforlater.svg`} />
+          </RoundButton>
+          <RoundButton onClick={this.toggleMoreMenu}>
+            <img src={`/notifications.svg`} />
+          </RoundButton>
+        </MoreMenu>
         <MessageBoxWrapper onSubmit={this.props.onSend}>
+          <RoundButton
+            onClick={this.toggleMoreMenu}
+            isOpen={this.state.isMoreMenuOpen}
+            type={`button`}
+          >
+            <img src={`/more.svg`} />
+          </RoundButton>
           <MessageInput
             type={this.props.isRecordingPassword ? `password` : `text`}
             placeholder={i18n.__("MESSAGE_BOX_PLACEHOLDER")}
             value={this.props.message}
             onChange={this.props.onChange}
           />
-          <SendButton type={`submit`} value={``}/>
+          <RoundButton type={`submit`} right>
+            <img src={`/send.svg`} />
+          </RoundButton>
         </MessageBoxWrapper>
       </MessageBoxAndSuggestions>
     );
