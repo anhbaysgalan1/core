@@ -60,6 +60,7 @@ mongo-dev-server@1.1.0
 mongo-id@1.0.6
 npm-bcrypt@0.9.3
 npm-mongo@2.2.33
+numtel:mysql@1.0.6
 observe-sequence@1.0.16
 ordered-dict@1.0.9
 promise@0.10.0

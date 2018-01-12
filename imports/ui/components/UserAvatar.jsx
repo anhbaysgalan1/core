@@ -76,8 +76,8 @@ const Avatar = styled.img`
 
 class UserAvatar extends Component {
   static propTypes = {
-    avatarUrl: PropTypes.String,
-    completion: PropTypes.Number
+    avatarUrl: PropTypes.string,
+    completion: PropTypes.number
   }
 
   render() {
