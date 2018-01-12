@@ -1,0 +1,11 @@
+{
+  "mysql": {
+    "host": "undermindcore.cflkgiwe0kzr.eu-west-3.rds.amazonaws.com",
+    "port": 3306,
+    "user": "Undermind",
+    "password": "Undermind_12345",
+    "serverId": 123,
+    "minInterval": 200,
+    "database": "undermind_core"
+  }
+}

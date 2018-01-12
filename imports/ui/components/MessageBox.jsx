@@ -65,7 +65,7 @@ const MoreMenu = styled.nav`
   
   margin-left: .4rem;
   
-  background: white;
+  background: transparent;
   
   button {
     opacity: ${props => props.isOpen ? `1` : `0`};
@@ -75,6 +75,8 @@ const MoreMenu = styled.nav`
     transition-timing-function: ease;
     
     margin: .3rem 0;
+    
+    background: transparent;
   }
   
   //&.visible button {

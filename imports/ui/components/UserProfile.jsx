@@ -25,12 +25,12 @@ const UserSection = styled.div`
 
 class UserProfile extends Component {
   static propTypes = {
-    avatar: PropTypes.String,
-    level: PropTypes.String,
-    xp: PropTypes.String,
-    xpMax: PropTypes.String,
-    tokens: PropTypes.String
-  }
+    avatar: PropTypes.string,
+    level: PropTypes.string,
+    xp: PropTypes.string,
+    xpMax: PropTypes.string,
+    tokens: PropTypes.string
+  };
 
   render() {
     return (

@@ -29,8 +29,6 @@ const Anorak = styled.img`
 
 class Header extends Component {
   render() {
-    console.log(this.props);
-
     const { location } = this.props;
 
     const currentPane = location.pathname === "/profile" ? "profile" : "chat";

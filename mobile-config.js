@@ -8,3 +8,5 @@ App.info({
   website: 'http://loanlaux.fr',
   buildNumber: '108008'
 });
+
+App.setPreference("StatusBarBackgroundColor", "#0f90d1");

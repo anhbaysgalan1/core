@@ -34,3 +34,4 @@ shell-server@0.3.0
 dynamic-import@0.2.0
 universe:i18n
 fortawesome:fontawesome
+numtel:mysql

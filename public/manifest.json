@@ -1,0 +1,10 @@
+{
+  "theme_color": "#0f90d1",
+  "background_color": "#0f90d1",
+  "display": "standalone",
+  "orientation": "portrait",
+  "Scope": "/",
+  "start_url": "/",
+  "icons": null,
+  "splash_pages": null
+}
