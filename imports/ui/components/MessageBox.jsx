@@ -37,12 +37,14 @@ const MessageInput = styled.input`
   width: 100%;
 `;
 
-const RoundButton = styled.button`
+const RoundButton = styled.a`
+  display: block;
+  
   border: none;
   border-radius: 50%;
   
-  width: 1.8rem;
-  height: 1.8rem;
+  width: 1.5rem;
+  height: 1.5rem;
   
   ${props => props.right && `position: absolute;`}
   ${props => props.right ? `right` : `left`}: .7rem;
@@ -55,7 +57,6 @@ const RoundButton = styled.button`
   transition: all 300ms ease;
   
   img {
-    width: 100%;
     height: 100%;
   }
 `;
@@ -67,10 +68,11 @@ const MoreMenu = styled.nav`
   
   background: transparent;
   
-  button {
+  a {
     opacity: ${props => props.isOpen ? `1` : `0`};
+    display: ${props => props.isOpen ? `block` : `none`};
     
-    transition-property: opacity;
+    transition-property: all;
     transition-duration: 300ms;
     transition-timing-function: ease;
     
@@ -123,14 +125,23 @@ class MessageBox extends Component {
           {/*onSuggestionClicked={this.props.onSuggestionClicked}*/}
         {/*/>*/}
         <MoreMenu isOpen={this.state.isMoreMenuOpen}>
-          <RoundButton onClick={this.toggleMoreMenu}>
-            <img src={`/settings.svg`} />
+          <RoundButton href={"https://undermind.typeform.com/to/DxEfih"} target={"_blank"}>
+            <img src={`/question.png`} />
+          </RoundButton>
+          <RoundButton href={"https://undermind.typeform.com/to/QgwOAs"} target={"_blank"}>
+            <img src={`/add-course.png`} />
+          </RoundButton>
+          <RoundButton href={"https://undermind.typeform.com/to/ctkhrr"} target={"_blank"}>
+            <img src={`/bug.png`} />
           </RoundButton>
           <RoundButton onClick={this.toggleMoreMenu}>
-            <img src={`/saveforlater.svg`} />
+            <img src={`/settings.png`} />
           </RoundButton>
           <RoundButton onClick={this.toggleMoreMenu}>
-            <img src={`/notifications.svg`} />
+            <img src={`/saveforlater.png`} />
+          </RoundButton>
+          <RoundButton onClick={this.toggleMoreMenu}>
+            <img src={`/notifications.png`} />
           </RoundButton>
         </MoreMenu>
         <MessageBoxWrapper onSubmit={this.props.onSend}>

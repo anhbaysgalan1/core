@@ -4,6 +4,8 @@ import i18n from "meteor/universe:i18n";
 
 import MessageBubble from "./MessageBubble";
 import LinkBubble from "./LinkBubble";
+import MessageLinkBubble from "./MessageLinkBubble";
+import AvatarBubble from "./AvatarBubble";
 
 const ellipsis = keyframes`
   to {
@@ -71,17 +73,46 @@ class Conversation extends Component {
 
   renderLink = (link) => (
     <LinkBubble link={link} />
-  )
+  );
+
+  renderAvatar = (avatar) => (
+    <AvatarBubble avatar={avatar} onClick={this.props.onAvatarClicked} />
+  );
+
+  renderSuggestions = (suggestions) => suggestions.map(suggestion => {
+    console.log("renderSuggestions", suggestion);
+
+    if (typeof suggestion === "object" && suggestion.type && suggestion.type === "image") {
+      console.log("Suggestion is avatar", suggestion);
+      return this.renderAvatar(suggestion);
+    } else if (typeof suggestion === "object" && suggestion.link) {
+      return this.renderLink(suggestion);
+    }
+
+    return this.renderSuggestion(suggestion);
+  });
+
+  renderMessage = (message) => {
+    if (message.link) {
+      return (<MessageLinkBubble link={message} />);
+    } else if (message.type && message.type === "avatar") {
+      return this.renderAvatar(message);
+    }
+
+    return (<MessageBubble message={message} />);
+  };
 
   render() {
     const { messages, suggestions, botIsTyping } = this.props;
 
+    const suggestionComponents = this.renderSuggestions(suggestions);
+
+    console.log("suggestionComponents", suggestionComponents);
+
     return [
       <ConversationWrapper innerRef={wrapper => this.conversationWrapper = wrapper}>
-        {messages.map(message => <MessageBubble message={message} />)}
-        {suggestions.map(suggestion =>
-          typeof suggestion === "string" ? this.renderSuggestion(suggestion) : this.renderLink(suggestion)
-        )}
+        {messages.map(message => this.renderMessage(message))}
+        {suggestionComponents}
         {botIsTyping && <BotIsTyping>{i18n.__("ANORAK_IS_TYPING")}</BotIsTyping>}
       </ConversationWrapper>
     ]

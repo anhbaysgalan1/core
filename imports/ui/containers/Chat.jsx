@@ -25,6 +25,7 @@ class Chat extends Component {
       registering: false,
       userName: "",
       email: "",
+      gender: ""
     };
 
     if (Meteor.user()) {
@@ -42,6 +43,7 @@ class Chat extends Component {
     this.handleMessageChange = this.handleMessageChange.bind(this);
     this.handleSuggestionClicked = this.handleSuggestionClicked.bind(this);
     this.startLoginScript = this.startLoginScript.bind(this);
+    this.handleAvatarClicked = this.handleAvatarClicked.bind(this);
   }
 
   awaitSuggestionChoice = (suggestions) => new Promise((resolve, reject) => {
@@ -50,6 +52,25 @@ class Chat extends Component {
       suggestions: suggestions
     });
   });
+
+  awaitReply = (suggestions) => new Promise((resolve, reject) => {
+    this.setState({
+      onReply: resolve // Passing the resolve reference
+    });
+  });
+
+  displayAvatars = () => {
+    this.setState({
+      suggestions: [
+        { type: "image", url: "/avatar/Astronomer_Bright.png" },
+        { type: "image", url: "/avatar/Explorer_Bright.png" },
+        { type: "image", url: "/avatar/Hacker_Bright.png" },
+        { type: "image", url: "/avatar/Musician_Bright.png" },
+        { type: "image", url: "/avatar/Scientist_Bright.png" },
+        { type: "image", url: "/avatar/Warrior_Bright.png" }
+      ]
+    });
+  };
 
   greet(isFirstMessage = false) {
     // Greet user
@@ -78,6 +99,8 @@ class Chat extends Component {
         i18n.__("SUGGESTION_ARTICLE")
       ]))
       .then((message) => {
+        this.setState({ onSuggestionChoice: null });
+
         if (message.includes(i18n.__("VIDEO"))) {
           this.displayDiscover("video");
         } else if (message.includes(i18n.__("COURSE"))) {
@@ -128,8 +151,10 @@ class Chat extends Component {
       conversation,
       email,
       onSuggestionChoice,
+      onReply,
       registering,
-      userName
+      userName,
+      gender
     } = this.state;
 
     let typedMessage = this.state.typedMessage;
@@ -137,17 +162,31 @@ class Chat extends Component {
     this.setState({ suggestions: [] });
 
     const userIsTypingPassword = (authenticating && userName.length > 0) ||
-      (registering && userName.length > 0 && email.length > 0);
+      (registering && userName.length > 0 && email.length > 0 && gender.length > 0);
 
-    // If user has typed a pasword, replace characters by dots before pushing it to  conversation
     if (userIsTypingPassword) {
+      console.log("User is typing password");
+      // If user has typed a pasword, replace characters by dots before pushing it to conversation
+
       typedMessage = Array.prototype.map.call(typedMessage, () => "●");
     }
     
     // Push message to conversation
     conversation.push({ sender: "me", text: typedMessage });
 
+    console.log("Handling sent message");
+
+    if (onReply) {
+      console.log("Got onReply", onReply);
+      this.setState({ typedMessage: "" });
+
+      return onReply(typedMessage);
+    }
+
     if (onSuggestionChoice) {
+      console.log("Got onSuggestionChoice", onSuggestionChoice);
+      console.log("Suggestions", this.state.suggestions);
+
       this.setState({ conversation, typedMessage: "" });
 
       return onSuggestionChoice(typedMessage);
@@ -162,7 +201,7 @@ class Chat extends Component {
 
     // If user is authenticating and has typed password, attempt to log in
     if (authenticating && userIsTypingPassword) {
-      Meteor.loginWithPassword(userName, typedMessage, (err) => {
+      Meteor.loginWithPassword(userName, this.state.typedMessage, (err) => {
         if (err) {
           this.sendJinaResponse(i18n.__("JINA_ERROR_SOMETHING_WENT_WRONG", { err }))
             .then(() => this.sendJinaResponse(i18n.__("JINA_ERROR_PASSWORD_TRY_AGAIN")));
@@ -173,50 +212,52 @@ class Chat extends Component {
     }
     // If user is registering and has typed password, attempt to register
     else if (registering && userIsTypingPassword) {
+      console.log("THE PASSWORD IS ", this.state.typedMessage);
       Accounts.createUser({
         username: userName,
         email: email,
-        password: typedMessage,
+        password: this.state.typedMessage, // State reference to typedMessage because local one is obfuscated
         profile: {
-          level: "1",
-          xp: "0",
-          tokens: "0",
+          avatar: this.state.avatar,
+          level: 1,
+          xp: 0,
+          tokens: 0,
           skills: [
             {
-              "image" : "graph.png",
-              "xp" : "4,500",
-              "xpMax" : "10,000",
-              "rank" : "First class"
+              "slug": "astronomy",
+              "xp": 4500,
+              "xpMax": 10000,
+              "rank": "First class"
             },
             {
-              "image" : "microscope.png",
-              "xp" : "0",
-              "xpMax" : "10,000",
-              "rank" : "First class"
+              "slug": "curiosity",
+              "xp": 0,
+              "xpMax": 10000,
+              "rank": "First class"
             },
             {
-              "image" : "test-tubes.png",
-              "xp" : "0",
-              "xpMax" : "10,000",
-              "rank" : "First class"
+              "slug": "chemistry",
+              "xp": 0,
+              "xpMax": 10000,
+              "rank": "First class"
             },
             {
-              "image" : "globe.png",
-              "xp" : "0",
-              "xpMax" : "10,000",
-              "rank" : "First class"
+              "slug": "startup",
+              "xp": 6000,
+              "xpMax": 10000,
+              "rank": "First class"
             },
             {
-              "image" : "toy.png",
-              "xp" : "0",
-              "xpMax" : "10,000",
-              "rank" : "First class"
+              "slug": "philosophy",
+              "xp": 0,
+              "xpMax": 10000,
+              "rank": "First class"
             },
             {
-              "image" : "computer.png",
-              "xp" : "0",
-              "xpMax" : "10,000",
-              "rank" : "First class"
+              "slug": "tech",
+              "xp": 0,
+              "xpMax": 10000,
+              "rank": "First class"
             }
           ]
         }
@@ -256,13 +297,34 @@ class Chat extends Component {
     else if (this.state.registering && this.state.userName) {
       this.setState({ email: typedMessage });
 
-      this.sendJinaResponse(i18n.__("JINA_REGISTRATION_PASSWORD_PROMPT"));
+      this.sendJinaResponse(i18n.__("ANORAK_REGISTRATION_PICK_GENDER"))
+        .then(() => this.awaitSuggestionChoice([i18n.__("SUGGESTION_GENDER_MALE"), i18n.__("SUGGESTION_GENDER_FEMALE")]))
+        .then((gender) => {
+          this.setState({ gender });
+
+          this.sendJinaResponse(i18n.__("ANORAK_REGISTRATION_PICK_AVATAR"));
+
+          this.displayAvatars();
+        });
     }
     // If user is registering
     else if (this.state.registering) {
       this.setState({ userName: typedMessage });
 
-      this.sendJinaResponse(i18n.__("JINA_REGISTRATION_EMAIL_PROMPT"));
+      Meteor.call("user/doesUserExist", typedMessage, (error, result) => {
+        if (!error && result) {
+          this.setState({ userName: typedMessage }, () => {
+            this.sendJinaResponse(i18n.__("ANORAK_REGISTRATION_USERNAME_TAKEN"), { userName: typedMessage });
+          });
+        } else {
+          this.sendJinaResponse(i18n.__("ANORAK_REGISTRATION_AGREE_TOC", { userName: typedMessage }), { link: "https://undermind.typeform.com/to/BJumJz" })
+            .then(() => this.awaitSuggestionChoice([i18n.__("SUGGESTION_AGREE"), i18n.__("SUGGESTION_DISAGREE")]))
+            .then(() => {
+              this.setState({ onSuggestionChoice: null });
+              this.sendJinaResponse(i18n.__("ANORAK_REGISTRATION_PICK_EMAIL", { userName: typedMessage }))
+            });
+        }
+      });
     }
     // If user asks for privacy policy
     else if (this.state.privacyPolicyCapture && typedMessage.includes(i18n.__("SUGGESTION_REGISTRATION_PRIVACY_NO"))) {
@@ -308,12 +370,17 @@ class Chat extends Component {
       const conversation = this.state.conversation;
 
       // Delay to simulate a message being typed
-      const delay = 500 + 15 * message.length;
+      const delay = 500 + 10 * message.length;
 
       console.log("Delay ", delay);
 
       setTimeout(() => {
-        conversation.push({ sender: "jina", text: message });
+        if (options.link) {
+          conversation.push({ sender: "jina", text: message, link: options.link });
+        } else {
+          conversation.push({ sender: "jina", text: message });
+        }
+
         this.setState({ conversation }, () => {
           this.setState({ isTyping: false });
 
@@ -353,17 +420,28 @@ class Chat extends Component {
     } else {
       this.sendJinaResponse(i18n.__("JINA_REGISTRATION_GREETING"))
         .then(() => this.sendJinaResponse(i18n.__("JINA_REGISTRATION_GREETING_2")))
-        .then(() => this.setState({
-          privacyPolicyCapture: true,
-          suggestions: [i18n.__("SUGGESTION_REGISTRATION_PRIVACY_YES"), i18n.__("SUGGESTION_REGISTRATION_PRIVACY_NO")]
-        }));
+        .then(() => this.awaitSuggestionChoice([i18n.__("SUGGESTION_REGISTRATION_PRIVACY_YES"), i18n.__("SUGGESTION_REGISTRATION_PRIVACY_NO")]))
+        .then((choice) => {
+          if (choice.includes(i18n.__("SUGGESTION_REGISTRATION_PRIVACY_YES"))) {
+            this.sendJinaResponse(i18n.__("ANORAK_REGISTRATION_AGE_CHECK"))
+              .then(() => this.awaitReply())
+              .then((choice) => {
+                this.setState({ onReply: null, onSuggestionChoice: null });
 
-      // this.sendJinaResponse(i18n.__("JINA_REGISTRATION_USERNAME_PROMPT"));
+                console.log("Got choice", choice);
 
-      // this.setState({
-      //   registering: true,
-      //   suggestions: []
-      // });
+                if (parseInt(choice) <= 13) {
+                  this.sendJinaResponse(i18n.__("ANORAK_REGISTRATION_TOO_YOUNG"));
+                } else {
+                  this.sendJinaResponse(i18n.__("ANORAK_REGISTRATION_AGE_OK"))
+                    .then(() => {
+                      this.sendJinaResponse(i18n.__("ANORAK_REGISTRATION_PICK_USERNAME"));
+                      this.setState({ registering: true, onReply: null });
+                    });
+                }
+              });
+          }
+        });
     }
   }
 
@@ -380,9 +458,23 @@ class Chat extends Component {
     });
   }
 
+  handleAvatarClicked(event, url) {
+    console.log("Clicked avatar with url:", url);
+
+    this.setState({
+      avatar: url,
+      suggestions: [],
+      onSuggestionChoice: null,
+      conversation: [
+        ...this.state.conversation,
+        { type: "avatar", url }
+      ]
+    }, () => this.sendJinaResponse(i18n.__("UNDERMIND_REGISTRATION_PASSWORD_PROMPT")));
+  }
+
   render() {
     const userIsTypingPassword = (this.state.authenticating && this.state.userName.length > 0) ||
-      (this.state.registering && this.state.userName.length > 0 && this.state.email.length > 0);
+      (this.state.registering && this.state.userName.length > 0 && this.state.email.length > 0 && this.state.gender.length > 0);
 
     return [
       <Header {...this.props} />,
@@ -391,6 +483,7 @@ class Chat extends Component {
         suggestions={this.state.suggestions}
         botIsTyping={this.state.isTyping}
         onSuggestionClicked={this.handleSuggestionClicked}
+        onAvatarClicked={this.handleAvatarClicked}
       />,
       <MessageBox
         message={this.state.typedMessage}

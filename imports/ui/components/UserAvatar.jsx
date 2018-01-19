@@ -71,14 +71,18 @@ const Circle = styled.div`
 `;
 
 const Avatar = styled.img`
-  width: 5rem;
+  border-radius: 50%;
+  height: 5rem;
+  position: relative;
+  transform: translateX(-50%);
+  left: 50%;
 `;
 
 class UserAvatar extends Component {
   static propTypes = {
     avatarUrl: PropTypes.string,
     completion: PropTypes.number
-  }
+  };
 
   render() {
     return (

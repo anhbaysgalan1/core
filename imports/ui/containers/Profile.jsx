@@ -3,14 +3,15 @@ import { Meteor } from "meteor/meteor";
 import styled from "styled-components";
 import { compose } from "react-komposer";
 
-import { Header, UserProfile, UserSubjects } from "../components";
+import { getAllCategories } from "../../api/Category";
+import { Header, UserProfile, UserSubjects, LeaderboardNavigation } from "../components";
 
 const WarningWrapper = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
   
-  height: 80vh;
+  height: ${props => props.loggedIn ? "40vh" : "80vh"};
 `;
 
 const Warning = styled.h2`
@@ -21,7 +22,15 @@ const Warning = styled.h2`
 class Profile extends Component {
   constructor() {
     super();
+
+    this.state = {
+      activeLeaderboardPane: "skills"
+    };
   }
+
+  handleLeaderboardIconClicked = (activeLeaderboardPane) => {
+    this.setState({ activeLeaderboardPane });
+  };
 
   render() {
     const profile = this.props.userProfile;
@@ -32,13 +41,27 @@ class Profile extends Component {
         {profile ?
           <div>
             <UserProfile
-              avatar={`/avatar.png`}
+              avatar={profile.avatar}
               level={profile.level}
               xp={profile.xp}
               xpMax={`100,000`}
               tokens={profile.tokens}
             />
-            <UserSubjects subjects={profile.skills} />
+            {this.state.activeLeaderboardPane === "skills" &&
+              <UserSubjects
+                subjects={profile.skills.sort((a, b) => parseInt(b.xp) - parseInt(a.xp))}
+                categories={this.props.categories}
+              />
+            }
+            {this.state.activeLeaderboardPane === "contentProviders" &&
+              <WarningWrapper loggedIn>
+                <Warning>¡La página no existe!</Warning>
+              </WarningWrapper>
+            }
+            <LeaderboardNavigation
+              onIconClick={this.handleLeaderboardIconClicked}
+              currentPane={this.state.activeLeaderboardPane}
+            />
           </div>
           :
           <WarningWrapper>
@@ -68,9 +91,10 @@ function getTrackerLoader(reactiveMapper) {
 }
 
 function dataLoader(props, onData) {
-  if (Meteor.subscribe("users").ready()) {
+  if (Meteor.subscribe("users").ready() && Meteor.subscribe("categories").ready()) {
     onData(null, {
-      userProfile: Meteor.user() && Meteor.user().profile
+      userProfile: Meteor.user() && Meteor.user().profile,
+      categories: getAllCategories()
     });
   }
 }
