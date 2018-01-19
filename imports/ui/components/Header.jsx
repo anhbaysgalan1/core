@@ -1,5 +1,4 @@
 import React, { Component } from "react";
-import ReactSVG from "react-svg";
 import styled from "styled-components";
 
 const HeaderWrapper = styled.div`
@@ -16,7 +15,7 @@ const Switch = styled.div`
 `;
 
 const Icon = styled.img`
-  width: 1.5rem;
+  height: 1.5rem;
   
   margin: 0 .5rem;
   

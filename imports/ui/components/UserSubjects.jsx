@@ -6,7 +6,7 @@ const SubjectWrapper = styled.div`
   flex-wrap: wrap;
   justify-content: space-between;
   
-  padding: 0 .2rem;
+  padding: 0 .8rem;
 `;
 
 const Subject = styled.div`
@@ -31,7 +31,7 @@ class UserSubjects extends Component {
       <SubjectWrapper>
         {subjects.map((subject, index) => (
           <Subject key={index}>
-            <Icon src={subject.image} />
+            <Icon src={`/icons/${subject.slug}.png`} />
             <div>
               <p>{subject.xp}/{subject.xpMax}</p>
               <p>{subject.rank}</p>
