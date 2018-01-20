@@ -49,5 +49,11 @@
   "ANORAK_REGISTRATION_PICK_GENDER": "Tell me human, are you male or female?",
   "SUGGESTION_GENDER_MALE": "Male",
   "SUGGESTION_GENDER_FEMALE": "Female",
-  "ANORAK_REGISTRATION_PICK_AVATAR": "Brilliant, we’re nearly done. I’m going to need you to pick an avatar."
+  "ANORAK_REGISTRATION_PICK_AVATAR": "Brilliant, we’re nearly done. I’m going to need you to pick an avatar.",
+  "ANORAK_DID_YOU_FINISH": "Did you finish?",
+  "SUGGESTION_YES": "Yes",
+  "SUGGESTION_NO": "No",
+  "ANORAK_SAVE_FOR_LATER": "Do you want me to save it for later?",
+  "ANORAK_SAVED_FOR_LATER": "Done!",
+  "ANORAK_CONGRATULATIONS": "Upgrading your mind one paragraph at a time…"
 }

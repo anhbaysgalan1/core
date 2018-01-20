@@ -26,7 +26,8 @@ class Chat extends Component {
       userName: "",
       email: "",
       gender: "",
-      isLongPressMenuOpen: false
+      isLongPressMenuOpen: false,
+      linkClickCounter: 0
     };
 
     if (Meteor.user()) {
@@ -484,6 +485,38 @@ class Chat extends Component {
     console.log("handleLinkLongPress for link", link);
   }
 
+  handleLinkClickStop = (enough, link) => {
+    if (!enough) {
+      this.setState({
+        linkClickCounter: this.state.linkClickCounter + 1 // For some reason, the click event is fired twice. Here we wait for the second one.
+      }, () => {
+        if (this.state.linkClickCounter >= 2) {
+          console.log("::: Clicked on link", link);
+
+          this.sendJinaResponse(i18n.__("ANORAK_DID_YOU_FINISH"))
+            .then(() => this.awaitSuggestionChoice([i18n.__("SUGGESTION_YES"), i18n.__("SUGGESTION_NO")]))
+            .then((finished) => {
+              if (finished === i18n.__("SUGGESTION_YES")) {
+                this.sendJinaResponse(i18n.__("ANORAK_CONGRATULATIONS"));
+              } else {
+                this.sendJinaResponse(i18n.__("ANORAK_SAVE_FOR_LATER"))
+                  .then(() => this.awaitSuggestionChoice([i18n.__("SUGGESTION_YES"), i18n.__("SUGGESTION_NO")]))
+                  .then((saveForLater) => {
+                    if (saveForLater === i18n.__("SUGGESTION_YES")) {
+                      Meteor.call("content/saveForLater", link.id, (error) => {
+                        this.sendJinaResponse(i18n.__("ANORAK_SAVED_FOR_LATER"));
+                      });
+                    }
+                  });
+              }
+            });
+
+          this.setState({ linkClickCounter: 0 });
+        }
+      });
+    }
+  }
+
   handleSaveForLater = () => {
     console.log("handleSaveForLater for link id", this.state.longPressedLink.id);
 
@@ -521,6 +554,7 @@ class Chat extends Component {
         onSuggestionClicked={this.handleSuggestionClicked}
         onAvatarClicked={this.handleAvatarClicked}
         onLinkLongPress={this.handleLinkLongPress}
+        onLinkClickStop={this.handleLinkClickStop}
       />,
       <LongPressMenu
         visible={this.state.isLongPressMenuOpen}
