@@ -7,7 +7,7 @@ import React, { Component } from "react";
 import { compose } from "react-komposer";
 import partOfDay from "humanized-part-of-day";
 
-import { Conversation, MessageBox, Header } from "../components";
+import { Conversation, MessageBox, Header, LongPressMenu } from "../components";
 
 const allContent = new MysqlSubscription("allContent");
 
@@ -25,7 +25,8 @@ class Chat extends Component {
       registering: false,
       userName: "",
       email: "",
-      gender: ""
+      gender: "",
+      isLongPressMenuOpen: false
     };
 
     if (Meteor.user()) {
@@ -44,6 +45,7 @@ class Chat extends Component {
     this.handleSuggestionClicked = this.handleSuggestionClicked.bind(this);
     this.startLoginScript = this.startLoginScript.bind(this);
     this.handleAvatarClicked = this.handleAvatarClicked.bind(this);
+    this.handleLinkLongPress = this.handleLinkLongPress.bind(this);
   }
 
   awaitSuggestionChoice = (suggestions) => new Promise((resolve, reject) => {
@@ -125,6 +127,7 @@ class Chat extends Component {
           console.log("content:", this.props.content);
 
           const filteredContent = this.props.content.map((row) => ({
+            id: row.row_id,
             title: row.title,
             link: row.link,
             image: row.image || "http://via.placeholder.com/150x100",
@@ -472,6 +475,39 @@ class Chat extends Component {
     }, () => this.sendJinaResponse(i18n.__("UNDERMIND_REGISTRATION_PASSWORD_PROMPT")));
   }
 
+  handleLinkLongPress(link) {
+    this.setState({
+      isLongPressMenuOpen: true,
+      longPressedLink: link
+    });
+
+    console.log("handleLinkLongPress for link", link);
+  }
+
+  handleSaveForLater = () => {
+    console.log("handleSaveForLater for link id", this.state.longPressedLink.id);
+
+    Meteor.call("content/saveForLater", this.state.longPressedLink.id, (error, result) => {
+      if (error) {
+        this.sendJinaResponse(error);
+      }
+
+      this.setState({
+        isLongPressMenuOpen: false,
+        longPressedLink: null
+      });
+    });
+  };
+
+  handleReport = () => {
+    console.log("handleReport for link id", this.state.longPressedLink.id);
+
+    this.setState({
+      isLongPressMenuOpen: false,
+      longPressedLink: null
+    });
+  };
+
   render() {
     const userIsTypingPassword = (this.state.authenticating && this.state.userName.length > 0) ||
       (this.state.registering && this.state.userName.length > 0 && this.state.email.length > 0 && this.state.gender.length > 0);
@@ -484,8 +520,15 @@ class Chat extends Component {
         botIsTyping={this.state.isTyping}
         onSuggestionClicked={this.handleSuggestionClicked}
         onAvatarClicked={this.handleAvatarClicked}
+        onLinkLongPress={this.handleLinkLongPress}
+      />,
+      <LongPressMenu
+        visible={this.state.isLongPressMenuOpen}
+        onSaveForLaterClick={this.handleSaveForLater}
+        onReportClick={this.handleReport}
       />,
       <MessageBox
+        {...this.props} // Passing history
         message={this.state.typedMessage}
         isRecordingPassword={userIsTypingPassword}
         onSend={this.handleMessageSend}

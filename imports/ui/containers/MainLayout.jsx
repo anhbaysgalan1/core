@@ -6,6 +6,7 @@ import "normalize.css";
 
 import Profile from "./Profile";
 import Chat from "./Chat";
+import SavedForLater from "./SavedForLater";
 import About from '../pages/About.jsx';
 import NotFound from '../pages/NotFound.jsx';
 
@@ -28,7 +29,8 @@ export default class MainLayout extends React.Component {
         <Switch>
           <Route exact path='/' component={Chat} />
           <Route path='/profile' component={Profile} />
-          <Route path = '/about' component={About} />
+          <Route path='/about' component={About} />
+          <Route path='/savedForLater' component={SavedForLater} />
           <Route component={NotFound} />
         </Switch>
       </Router>
