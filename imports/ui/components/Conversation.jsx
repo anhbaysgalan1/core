@@ -6,6 +6,7 @@ import MessageBubble from "./MessageBubble";
 import LinkBubble from "./LinkBubble";
 import MessageLinkBubble from "./MessageLinkBubble";
 import AvatarBubble from "./AvatarBubble";
+import InAppBrowser from "./InAppBrowser";
 
 const ellipsis = keyframes`
   to {
@@ -72,7 +73,11 @@ class Conversation extends Component {
   }
 
   renderLink = (link) => (
-    <LinkBubble link={link} onLongPress={() => this.props.onLinkLongPress(link)}/>
+    <LinkBubble
+      link={link}
+      onLongPress={() => this.props.onLinkLongPress(link)}
+      onClickStop={(e, enough) => this.props.onLinkClickStop(enough, link)}
+    />
   );
 
   renderAvatar = (avatar) => (
