@@ -2,6 +2,8 @@ import React from "react";
 import Truncate from "react-truncate";
 import styled from "styled-components";
 
+import ClickAndHold from "react-click-n-hold";
+
 import { BubbleWrapper, Bubble } from "./styled";
 
 const LinkWrapper = styled.a`
@@ -29,27 +31,29 @@ const Description = styled.span`
   margin: 0 .6rem;
 `;
 
-const LinkBubble = ({ link }) => (
+const LinkBubble = ({ link, onLongPress }) => (
   <BubbleWrapper sender={"me"} suggestion link>
-    <LinkWrapper href={link.link} target={"_blank"}>
-      <Bubble
-        sender={"me"}
-        suggestion
-        link
-      >
-        <Thumbnail src={link.image} />
-        <Title>
-          <Truncate lines={2} ellipsis={<span>...</span>}>
-            {link.title}
-          </Truncate>
-        </Title>
-        {/*<Description>*/}
-          {/*<Truncate lines={2} ellipsis={<span>...</span>}>*/}
-            {/*{link.description}*/}
-          {/*</Truncate>*/}
-        {/*</Description>*/}
-      </Bubble>
-    </LinkWrapper>
+    <ClickAndHold onClickNHold={onLongPress} time={1}>
+      <LinkWrapper href={link.link} target={"_blank"}>
+        <Bubble
+          sender={"me"}
+          suggestion
+          link
+        >
+          <Thumbnail src={link.image} />
+          <Title>
+            <Truncate lines={2} ellipsis={<span>...</span>}>
+              {link.title}
+            </Truncate>
+          </Title>
+          {/*<Description>*/}
+            {/*<Truncate lines={2} ellipsis={<span>...</span>}>*/}
+              {/*{link.description}*/}
+            {/*</Truncate>*/}
+          {/*</Description>*/}
+        </Bubble>
+      </LinkWrapper>
+    </ClickAndHold>
   </BubbleWrapper>
 );
 

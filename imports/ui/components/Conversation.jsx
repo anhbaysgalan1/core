@@ -72,7 +72,7 @@ class Conversation extends Component {
   }
 
   renderLink = (link) => (
-    <LinkBubble link={link} />
+    <LinkBubble link={link} onLongPress={() => this.props.onLinkLongPress(link)}/>
   );
 
   renderAvatar = (avatar) => (

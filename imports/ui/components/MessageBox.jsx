@@ -137,7 +137,7 @@ class MessageBox extends Component {
           <RoundButton onClick={this.toggleMoreMenu}>
             <img src={`/settings.png`} />
           </RoundButton>
-          <RoundButton onClick={this.toggleMoreMenu}>
+          <RoundButton onClick={() => this.props.history.push("/savedForLater")}>
             <img src={`/saveforlater.png`} />
           </RoundButton>
           <RoundButton onClick={this.toggleMoreMenu}>
