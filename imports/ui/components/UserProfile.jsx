@@ -23,6 +23,21 @@ const UserSection = styled.div`
   align-items: center;
 `;
 
+const Progress = styled.progress`
+  margin-top: 4px;
+  
+  &[value] {
+    height: 10px;
+    background: transparent;
+    border-radius: 4px;
+    border: 1px solid #0F90D1;
+  }
+  
+  &[value]::-webkit-progress-value {
+    background: #0F90D1;
+  }
+`;
+
 class UserProfile extends Component {
   static propTypes = {
     avatar: PropTypes.string,
@@ -39,8 +54,10 @@ class UserProfile extends Component {
           <UserAvatar avatarUrl={this.props.avatar} completion={1} />
           <UserInfo>
             <p>Level {this.props.level}</p>
-            <p>{this.props.xp}/{this.props.xpMax} XP</p>
-            <p>{this.props.tokens} tokens</p>
+            <p style={{ marginBottom: "10px" }}>{this.props.xp}/{this.props.xpMax} XP — {this.props.tokens} tokens</p>
+            <Progress value={parseInt(this.props.xp) * 100 / parseInt(this.props.xpMax)} max={100}>
+              {parseInt(this.props.xp) * 100 / parseInt(this.props.xpMax)}%
+            </Progress>
           </UserInfo>
         </UserSection>
       </Wrapper>

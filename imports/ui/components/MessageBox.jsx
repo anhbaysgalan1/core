@@ -47,8 +47,8 @@ const RoundButton = styled.a`
   height: 1.5rem;
   
   ${props => props.right && `position: absolute;`}
-  ${props => props.right ? `right` : `left`}: .7rem;
-  bottom: .7rem;
+  ${props => props.right ? `right` : `left`}: .9rem;
+  bottom: .9rem;
   
   padding: 0;
   
@@ -65,6 +65,8 @@ const MoreMenu = styled.nav`
   width: 3rem;
   
   margin-left: .4rem;
+  
+  text-align: center;
   
   background: transparent;
   
@@ -157,6 +159,7 @@ class MessageBox extends Component {
             placeholder={i18n.__("MESSAGE_BOX_PLACEHOLDER")}
             value={this.props.message}
             onChange={this.props.onChange}
+            innerRef={node => this.props.setMessageInputRef(node)}
           />
           <RoundButton type={`submit`} right>
             <img src={`/send.svg`} />

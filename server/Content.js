@@ -4,7 +4,7 @@ import { LiveMysql } from "meteor/numtel:mysql";
 const liveDb = new LiveMysql(Meteor.settings.mysql);
 
 Meteor.publish("allContent", () => {
-  return liveDb.select("SELECT * FROM cd_raw_intake ORDER BY RAND() LIMIT 3", [ { "table": "cd_raw_intake" } ]);
+  return liveDb.select("SELECT * FROM cd_raw_intake WHERE title <> '' ORDER BY RAND() LIMIT 3", [ { "table": "cd_raw_intake" } ]);
 });
 
 Meteor.publish("savedForLaterContent", (contentIds) => {

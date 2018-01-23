@@ -6,7 +6,7 @@ const SubjectWrapper = styled.div`
   flex-wrap: wrap;
   justify-content: space-between;
   
-  padding: 0 .8rem;
+  padding: 0 1.2rem;
 `;
 
 const Subject = styled.div`
