@@ -59,6 +59,8 @@ class Chat extends Component {
   awaitReply = (suggestions) => new Promise((resolve, reject) => {
     this.setState({
       onReply: resolve // Passing the resolve reference
+    }, () => {
+      this.messageInput.focus();
     });
   });
 
@@ -129,6 +131,8 @@ class Chat extends Component {
 
           const filteredContent = this.props.content.map((row) => ({
             id: row.row_id,
+            type: row.material_type,
+            categories: row.categories,
             title: row.title,
             link: row.link,
             image: row.image || "http://via.placeholder.com/150x100",
@@ -229,7 +233,7 @@ class Chat extends Component {
           skills: [
             {
               "slug": "astronomy",
-              "xp": 4500,
+              "xp": 0,
               "xpMax": 10000,
               "rank": "First class"
             },
@@ -247,7 +251,7 @@ class Chat extends Component {
             },
             {
               "slug": "startup",
-              "xp": 6000,
+              "xp": 0,
               "xpMax": 10000,
               "rank": "First class"
             },
@@ -360,6 +364,22 @@ class Chat extends Component {
     this.setState({ typedMessage: event.target.value });
   }
 
+  sendImage(url) {
+    return new Promise((resolve, reject) => {
+      const conversation = this.state.conversation;
+
+      conversation.push({
+        sender: "jina",
+        type: "image",
+        big: true,
+        isBot: true,
+        url
+      });
+
+      this.setState({ conversation }, () => resolve());
+    });
+  }
+
   /**
    * Send response from Jina
    *
@@ -401,6 +421,8 @@ class Chat extends Component {
   startLoginScript() {
     this.sendJinaResponse(i18n.__("JINA_LOGIN_USERNAME_PROMPT"))
       .then(() => {
+        this.messageInput.focus();
+
         // Set `authenticating` state bool value to true and empty suggestions
         this.setState({
           authenticating: true,
@@ -471,9 +493,9 @@ class Chat extends Component {
       onSuggestionChoice: null,
       conversation: [
         ...this.state.conversation,
-        { type: "avatar", url }
+        { type: "image", url }
       ]
-    }, () => this.sendJinaResponse(i18n.__("UNDERMIND_REGISTRATION_PASSWORD_PROMPT")));
+    }, () => this.sendJinaResponse(i18n.__("UNDERMIND_REGISTRATION_PASSWORD_PROMPT", { userName: this.state.userName })));
   }
 
   handleLinkLongPress(link) {
@@ -497,7 +519,11 @@ class Chat extends Component {
             .then(() => this.awaitSuggestionChoice([i18n.__("SUGGESTION_YES"), i18n.__("SUGGESTION_NO")]))
             .then((finished) => {
               if (finished === i18n.__("SUGGESTION_YES")) {
-                this.sendJinaResponse(i18n.__("ANORAK_CONGRATULATIONS"));
+                this.sendJinaResponse(i18n.__("ANORAK_CONGRATULATIONS"))
+                  .then(() => Meteor.call("user/awardPoints", link.type, link.categories, (error, summary) => {
+                    this.sendImage("/avatar_win.png")
+                      .then(() => this.sendJinaResponse(i18n.__("ANORAK_POINTS_SUMMARY", summary)));
+                  }));
               } else {
                 this.sendJinaResponse(i18n.__("ANORAK_SAVE_FOR_LATER"))
                   .then(() => this.awaitSuggestionChoice([i18n.__("SUGGESTION_YES"), i18n.__("SUGGESTION_NO")]))
@@ -567,6 +593,7 @@ class Chat extends Component {
         isRecordingPassword={userIsTypingPassword}
         onSend={this.handleMessageSend}
         onChange={this.handleMessageChange}
+        setMessageInputRef={(node) => { console.log("Setting messageInput ref", node); this.messageInput = node }}
       />
     ];
   }

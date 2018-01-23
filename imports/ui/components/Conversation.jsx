@@ -22,7 +22,7 @@ const ConversationWrapper = styled.section`
 
   max-height: 88vh;
   
-  padding: 1rem .8rem 2rem .8rem;
+  padding: 1rem .8rem 4rem .8rem;
   
   overflow-y: scroll;
 `;
@@ -52,11 +52,15 @@ class Conversation extends Component {
     this.conversationWrapper = null;
   }
 
-  componentWillReceiveProps() {
-    if (this.conversationWrapper) {
-      console.log("Auto-scrolling");
+  autoScroll = () => {
+    console.log("Auto-scrolling");
 
-      this.conversationWrapper.scrollTop = this.conversationWrapper.scrollHeight;
+    this.conversationWrapper.scrollTop = this.conversationWrapper.scrollHeight;
+  }
+
+  componentDidUpdate() {
+    if (this.conversationWrapper) {
+      this.autoScroll();
     }
   }
 
@@ -80,8 +84,8 @@ class Conversation extends Component {
     />
   );
 
-  renderAvatar = (avatar) => (
-    <AvatarBubble avatar={avatar} onClick={this.props.onAvatarClicked} />
+  renderAvatar = (avatar, isBot = false) => (
+    <AvatarBubble avatar={{ ...avatar, isBot }} onClick={this.props.onAvatarClicked} />
   );
 
   renderSuggestions = (suggestions) => suggestions.map(suggestion => {
@@ -89,7 +93,7 @@ class Conversation extends Component {
 
     if (typeof suggestion === "object" && suggestion.type && suggestion.type === "image") {
       console.log("Suggestion is avatar", suggestion);
-      return this.renderAvatar(suggestion);
+      return this.renderAvatar(suggestion, true);
     } else if (typeof suggestion === "object" && suggestion.link) {
       return this.renderLink(suggestion);
     }
@@ -100,7 +104,7 @@ class Conversation extends Component {
   renderMessage = (message) => {
     if (message.link) {
       return (<MessageLinkBubble link={message} />);
-    } else if (message.type && message.type === "avatar") {
+    } else if (message.type && message.type === "image") {
       return this.renderAvatar(message);
     }
 

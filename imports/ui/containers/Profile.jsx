@@ -44,18 +44,18 @@ class Profile extends Component {
               avatar={profile.avatar}
               level={profile.level}
               xp={profile.xp}
-              xpMax={`100,000`}
+              xpMax={parseInt(profile.level) * 1000}
               tokens={profile.tokens}
             />
             {this.state.activeLeaderboardPane === "skills" &&
               <UserSubjects
                 subjects={profile.skills.sort((a, b) => parseInt(b.xp) - parseInt(a.xp))}
-                categories={this.props.categories}
+                // categories={this.props.categories}
               />
             }
             {this.state.activeLeaderboardPane === "contentProviders" &&
               <WarningWrapper loggedIn>
-                <Warning>¡La página no existe!</Warning>
+                <Warning>Coming soon!</Warning>
               </WarningWrapper>
             }
             <LeaderboardNavigation
@@ -91,10 +91,12 @@ function getTrackerLoader(reactiveMapper) {
 }
 
 function dataLoader(props, onData) {
-  if (Meteor.subscribe("users").ready() && Meteor.subscribe("categories").ready()) {
+  if (Meteor.subscribe("users").ready()
+    // && Meteor.subscribe("categories").ready()
+  ) {
     onData(null, {
-      userProfile: Meteor.user() && Meteor.user().profile,
-      categories: getAllCategories()
+      userProfile: Meteor.user() && Meteor.user().profile//,
+      // categories: getAllCategories()
     });
   }
 }
