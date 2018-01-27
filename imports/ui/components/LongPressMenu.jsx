@@ -67,7 +67,7 @@ const LongPressMenu = ({ visible, onSaveForLaterClick, onReportClick }) => (
     <Overlay className={visible ? "visible" : ""}>
       <MenuWrapper>
         <Link href={"#"} onClick={onSaveForLaterClick}>Save for Later</Link>
-        <Link href={"#"} onClick={onReportClick }>Report</Link>
+        <Link href={"#"} onClick={onReportClick}>Report</Link>
       </MenuWrapper>
     </Overlay>
   </span>

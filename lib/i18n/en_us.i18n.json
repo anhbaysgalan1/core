@@ -61,5 +61,11 @@
   "ANORAK_REGISTRATION_WELCOME_2": "Your skills, current level and tokens will appear in your profile. The more you learn, the more your ranking increases! Someday you’ll be able to use your tokens to buy classes…",
   "ANORAK_REGISTRATION_WELCOME_3": "You can save something for later by long clicking on it. Are you ready?",
   "SUGGESTION_I_M_READY": "I’m ready",
-  "BEFORE_SHOWING_CONTENT": "Here's what I have!"
+  "BEFORE_SHOWING_CONTENT": "Here's what I have!",
+  "CONTINUE_DISCOVER_PROGRAM": "Should I keep on going?",
+  "KEEP_GOING": "keep on going",
+  "CONTENT_OVER": "That's all for today! Come back tomorrow.",
+  "KEEP_LEARNING": "Do you want to keep learning?",
+  "SUGGESTION_CALL_IT_A_DAY": "Let's call it a day",
+  "BYE": "Until next time!"
 }

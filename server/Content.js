@@ -15,5 +15,9 @@ Meteor.methods({
     `, [category]);
 
     return await connection.query(query);
+  },
+
+  "content/report": (id) => {
+    // Meteor.send
   }
 });
