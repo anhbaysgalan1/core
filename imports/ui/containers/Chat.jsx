@@ -24,7 +24,8 @@ class Chat extends Component {
       email: "",
       gender: "",
       isLongPressMenuOpen: false,
-      linkClickCounter: 0
+      linkClickCounter: 0,
+      discoverLoopCounter: 0
     };
 
     if (Meteor.user()) {
@@ -112,7 +113,7 @@ class Chat extends Component {
         } else {
           this.sendJinaResponse(i18n.__("ANORAK_UNDERSTANDING_ERROR"));
         }
-      });
+      })
   }
 
   /**
@@ -122,9 +123,10 @@ class Chat extends Component {
    */
 
   displayDiscover(type) {
-    this.sendJinaResponse(i18n.__("BEFORE_SHOWING_CONTENT"))
-      .then(() => Meteor.callPromise("content/getRandomFromCategory", type))
-      .then((content) => {
+    if (this.state.discoverLoopCounter < 2) {
+      this.sendJinaResponse(i18n.__("BEFORE_SHOWING_CONTENT"))
+        .then(() => Meteor.callPromise("content/getRandomFromCategory", type))
+        .then((content) => {
           console.log("content:", content);
 
           const filteredContent = content.map((row) => ({
@@ -137,10 +139,15 @@ class Chat extends Component {
             description: row.description || "Lorem ipsum dolor sit amet..."
           }));
 
+          filteredContent.push(i18n.__("CONTINUE_DISCOVER_PROGRAM"));
+
           console.log("filtered content:", filteredContent);
 
-          this.awaitSuggestionChoice(filteredContent);
+          return this.awaitSuggestionChoice(filteredContent);
         });
+    } else {
+      this.sendJinaResponse(i18n.__("CONTENT_OVER"))
+    }
   }
 
   /**
@@ -166,6 +173,12 @@ class Chat extends Component {
     let typedMessage = this.state.typedMessage;
 
     this.setState({ suggestions: [] });
+
+    if (typedMessage.includes(i18n.__("KEEP_GOING"))) {
+      this.setState({
+        discoverLoopCounter: this.state.discoverLoopCounter + 1
+      }, () => this.displayDiscover("article"));
+    }
 
     const userIsTypingPassword = (authenticating && userName.length > 0) ||
       (registering && userName.length > 0 && email.length > 0 && gender.length > 0);
@@ -395,7 +408,11 @@ class Chat extends Component {
       const conversation = this.state.conversation;
 
       // Delay to simulate a message being typed
-      const delay = 500 + 10 * message.length;
+      let delay = 500 + 10 * message.length;
+
+      if (options.extraDelay && parseInt(options.extraDelay)) {
+        delay = delay + options.extraDelay;
+      }
 
       console.log("Delay ", delay);
 
@@ -520,23 +537,37 @@ class Chat extends Component {
 
           this.sendJinaResponse(i18n.__("ANORAK_DID_YOU_FINISH"))
             .then(() => this.awaitSuggestionChoice([i18n.__("SUGGESTION_YES"), i18n.__("SUGGESTION_NO")]))
-            .then((finished) => {
+            .then(async (finished) => {
               if (finished === i18n.__("SUGGESTION_YES")) {
-                this.sendJinaResponse(i18n.__("ANORAK_CONGRATULATIONS"))
+                await this.sendJinaResponse(i18n.__("ANORAK_CONGRATULATIONS"))
                   .then(() => Meteor.call("user/awardPoints", link.type, link.categories, (error, summary) => {
                     this.sendImage("/avatar_win.png")
-                      .then(() => this.sendJinaResponse(i18n.__("ANORAK_POINTS_SUMMARY", summary)));
+                      .then(async () => await this.sendJinaResponse(i18n.__("ANORAK_POINTS_SUMMARY", summary)));
                   }));
               } else {
-                this.sendJinaResponse(i18n.__("ANORAK_SAVE_FOR_LATER"))
+                await this.sendJinaResponse(i18n.__("ANORAK_SAVE_FOR_LATER"))
                   .then(() => this.awaitSuggestionChoice([i18n.__("SUGGESTION_YES"), i18n.__("SUGGESTION_NO")]))
                   .then((saveForLater) => {
                     if (saveForLater === i18n.__("SUGGESTION_YES")) {
-                      Meteor.call("content/saveForLater", link.id, (error) => {
-                        this.sendJinaResponse(i18n.__("ANORAK_SAVED_FOR_LATER"));
+                      Meteor.call("content/saveForLater", link.id, async (error) => {
+                        await this.sendJinaResponse(i18n.__("ANORAK_SAVED_FOR_LATER"));
                       });
                     }
                   });
+              }
+            })
+            .then(() => this.sendJinaResponse(i18n.__("KEEP_LEARNING"), { extraDelay: 500 }))
+            .then(() => this.awaitSuggestionChoice([
+              i18n.__("SUGGESTION_YES"),
+              i18n.__("SUGGESTION_CALL_IT_A_DAY")
+            ]))
+            .then((choice) => {
+              if (choice.includes(i18n.__("SUGGESTION_YES"))) {
+                return this.showBriefing();
+              } else if (choice.includes(i18n.__("SUGGESTION_CALL_IT_A_DAY"))) {
+                return this.sendJinaResponse(i18n.__("BYE"));
+              } else {
+                return this.sendJinaResponse(i18n.__("ANORAK_UNDERSTANDING_ERROR"));
               }
             });
 
@@ -563,6 +594,8 @@ class Chat extends Component {
 
   handleReport = () => {
     console.log("handleReport for link id", this.state.longPressedLink.id);
+
+    Meteor.call("content/report", this.state.longPressedLink.id);
 
     this.setState({
       isLongPressMenuOpen: false,
