@@ -1,29 +1,19 @@
 import { Meteor } from "meteor/meteor";
-import { LiveMysql } from "meteor/numtel:mysql";
 
-const liveDb = new LiveMysql(Meteor.settings.mysql);
+Meteor.methods({
+  "content/getRandomFromCategory": async (category) => {
+    import mysql from "promise-mysql";
 
-Meteor.publish("allContent", () => {
-  return liveDb.select("SELECT * FROM cd_raw_intake WHERE title <> '' ORDER BY RAND() LIMIT 3", [ { "table": "cd_raw_intake" } ]);
+    const connection = await mysql.createConnection(Meteor.settings.mysql);
+
+    const query = mysql.format(`
+      SELECT *
+      FROM cd_raw_intake 
+      WHERE material_type = ?
+      ORDER BY RAND()
+      LIMIT 3
+    `, [category]);
+
+    return await connection.query(query);
+  }
 });
-
-Meteor.publish("savedForLaterContent", (contentIds) => {
-  return liveDb.select((esc, escId) => {
-    const query = ``;
-
-    console.log("savedForLater publication query:", query);
-
-    return query;
-  }, [ { "table": "cd_raw_intake" } ]);
-});
-
-const closeAndExit = function() {
-  liveDb.end();
-  process.exit();
-};
-
-// Close connections on hot code push
-process.on('SIGTERM', closeAndExit);
-// Close connections on exit (ctrl + c)
-process.on('SIGINT', closeAndExit);
-

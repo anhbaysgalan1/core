@@ -1,15 +1,12 @@
 import { Meteor } from "meteor/meteor";
 import { Accounts } from "meteor/accounts-base";
 import i18n from "meteor/universe:i18n";
-import { MysqlSubscription } from "meteor/numtel:mysql";
 
 import React, { Component } from "react";
 import { compose } from "react-komposer";
 import partOfDay from "humanized-part-of-day";
 
 import { Conversation, MessageBox, Header, LongPressMenu } from "../components";
-
-const allContent = new MysqlSubscription("allContent");
 
 class Chat extends Component {
   constructor() {
@@ -109,7 +106,7 @@ class Chat extends Component {
         if (message.includes(i18n.__("VIDEO"))) {
           this.displayDiscover("video");
         } else if (message.includes(i18n.__("COURSE"))) {
-          this.displayDiscover("course");
+          this.displayDiscover("classes");
         } else if (message.includes(i18n.__("ARTICLE"))) {
           this.displayDiscover("article");
         } else {
@@ -125,11 +122,12 @@ class Chat extends Component {
    */
 
   displayDiscover(type) {
-    this.sendJinaResponse(`Discover program for type ${type} goes here.`)
-      .then(() => {
-          console.log("content:", this.props.content);
+    this.sendJinaResponse(i18n.__("BEFORE_SHOWING_CONTENT"))
+      .then(() => Meteor.callPromise("content/getRandomFromCategory", type))
+      .then((content) => {
+          console.log("content:", content);
 
-          const filteredContent = this.props.content.map((row) => ({
+          const filteredContent = content.map((row) => ({
             id: row.row_id,
             type: row.material_type,
             categories: row.categories,
@@ -622,12 +620,11 @@ function getTrackerLoader(reactiveMapper) {
 }
 
 function dataLoader(props, onData) {
-  allContent.depend();
+  console.log("--- Chat dataLoader with props ---", props);
 
-  if (Meteor.subscribe("users").ready() && allContent.ready()) {
+  if (Meteor.subscribe("users").ready()) {
     onData(null, {
-      user: Meteor.user(),
-      content: allContent
+      user: Meteor.user()
     });
   }
 }
