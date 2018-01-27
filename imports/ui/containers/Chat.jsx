@@ -220,7 +220,6 @@ class Chat extends Component {
     }
     // If user is registering and has typed password, attempt to register
     else if (registering && userIsTypingPassword) {
-      console.log("THE PASSWORD IS ", this.state.typedMessage);
       Accounts.createUser({
         username: userName,
         email: email,
@@ -274,12 +273,15 @@ class Chat extends Component {
           this.sendJinaResponse(i18n.__("JINA_ERROR_SOMETHING_WENT_WRONG", { err }));
         } else {
           // Greet new user
-          this.sendJinaResponse(i18n.__("JINA_WELCOME", { name: Meteor.user().username }))
-            .then(() => this.setState({
-              registering: false
-            }, () => {
-              this.sendJinaResponse(i18n.__("JINA_ERROR_JINACORE"));
-            }));
+          this.sendJinaResponse(i18n.__("ANORAK_REGISTRATION_WELCOME_1"))
+            .then(() => this.sendJinaResponse(i18n.__("ANORAK_REGISTRATION_WELCOME_2")))
+            .then(() => {
+              this.setState({ registering: false });
+
+              return this.sendJinaResponse(i18n.__("ANORAK_REGISTRATION_WELCOME_3"));
+            })
+            .then(() => this.awaitSuggestionChoice([i18n.__("SUGGESTION_I_M_READY")]))
+            .then(() => this.greet());
         }
       });
     }
@@ -487,15 +489,17 @@ class Chat extends Component {
   handleAvatarClicked(event, url) {
     console.log("Clicked avatar with url:", url);
 
-    this.setState({
-      avatar: url,
-      suggestions: [],
-      onSuggestionChoice: null,
-      conversation: [
-        ...this.state.conversation,
-        { type: "image", url }
-      ]
-    }, () => this.sendJinaResponse(i18n.__("UNDERMIND_REGISTRATION_PASSWORD_PROMPT", { userName: this.state.userName })));
+    if (url !== "/avatar_win.png") {
+      this.setState({
+        avatar: url,
+        suggestions: [],
+        onSuggestionChoice: null,
+        conversation: [
+          ...this.state.conversation,
+          { type: "image", url }
+        ]
+      }, () => this.sendJinaResponse(i18n.__("UNDERMIND_REGISTRATION_PASSWORD_PROMPT", { userName: this.state.userName })));
+    }
   }
 
   handleLinkLongPress(link) {
