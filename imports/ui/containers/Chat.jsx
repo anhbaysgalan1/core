@@ -225,6 +225,7 @@ class Chat extends Component {
         email: email,
         password: this.state.typedMessage, // State reference to typedMessage because local one is obfuscated
         profile: {
+          willHaveToChooseCategories: true,
           avatar: this.state.avatar,
           level: 1,
           xp: 0,
