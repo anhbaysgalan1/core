@@ -119,48 +119,57 @@ class Chat extends Component {
   }
 
   showBriefing() {
-    this.sendJinaResponse(i18n.__("ANORAK_BRIEFING_INTRO"))
-      .then(() => this.awaitSuggestionChoice([
-        i18n.__("SUGGESTION_COURSE"),
-        i18n.__("SUGGESTION_VIDEO"),
-        i18n.__("SUGGESTION_ARTICLE")
-      ]))
-      .then((message) => {
-        this.setState({ onSuggestionChoice: null });
+    if (Meteor._localStorage.getItem("contentOverUntil") > new Date().getTime()) {
+      const unlockTime = new Date();
+      unlockTime.setTime(Meteor._localStorage.getItem("contentOverUntil"));
 
-        const skill = this.getRandomSkill();
+      this.sendJinaResponse(i18n.__("CONTENT_OVER_PRECISE", {
+        time: `${unlockTime.getHours()}:${unlockTime.getMinutes()}:${unlockTime.getSeconds()}`
+      }));
+    } else {
+      this.sendJinaResponse(i18n.__("ANORAK_BRIEFING_INTRO"))
+        .then(() => this.awaitSuggestionChoice([
+          i18n.__("SUGGESTION_COURSE"),
+          i18n.__("SUGGESTION_VIDEO"),
+          i18n.__("SUGGESTION_ARTICLE")
+        ]))
+        .then((message) => {
+          this.setState({ onSuggestionChoice: null });
 
-        if (message.includes(i18n.__("VIDEO"))) {
-          this.setState({
-            latestDiscover: {
-              skill,
-              type: "video"
-            }
-          });
+          const skill = this.getRandomSkill();
 
-          this.displayDiscover("video", skill);
-        } else if (message.includes(i18n.__("COURSE"))) {
-          this.setState({
-            latestDiscover: {
-              skill,
-              type: "classes"
-            }
-          });
+          if (message.includes(i18n.__("VIDEO"))) {
+            this.setState({
+              latestDiscover: {
+                skill,
+                type: "video"
+              }
+            });
 
-          this.displayDiscover("classes", skill);
-        } else if (message.includes(i18n.__("ARTICLE"))) {
-          this.setState({
-            latestDiscover: {
-              skill,
-              type: "article"
-            }
-          });
+            this.displayDiscover("video", skill);
+          } else if (message.includes(i18n.__("COURSE"))) {
+            this.setState({
+              latestDiscover: {
+                skill,
+                type: "classes"
+              }
+            });
 
-          this.displayDiscover("article", skill);
-        } else {
-          this.sendJinaResponse(i18n.__("ANORAK_UNDERSTANDING_ERROR"));
-        }
-      })
+            this.displayDiscover("classes", skill);
+          } else if (message.includes(i18n.__("ARTICLE"))) {
+            this.setState({
+              latestDiscover: {
+                skill,
+                type: "article"
+              }
+            });
+
+            this.displayDiscover("article", skill);
+          } else {
+            this.sendJinaResponse(i18n.__("ANORAK_UNDERSTANDING_ERROR"));
+          }
+        });
+    }
   }
 
   /**
@@ -173,7 +182,9 @@ class Chat extends Component {
   displayDiscover(type, skill) {
     console.log(`displayDiscover(${type}, ${skill})`);
 
-    // if (this.state.discoverLoopCounter < 2) {
+    if (Meteor._localStorage.getItem("contentOverUntil")) {
+      this.sendJinaResponse(i18n.__("CONTENT_OVER"))
+    } else {
       this.sendJinaResponse(i18n.__("BEFORE_SHOWING_CONTENT", { skill }))
         .then(() => Meteor.callPromise("content/getRandomFromCategory", type, skill))
         .then((content) => {
@@ -210,9 +221,7 @@ class Chat extends Component {
 
           return this.awaitSuggestionChoice(filteredContent);
         });
-    // } else {
-    //   this.sendJinaResponse(i18n.__("CONTENT_OVER"))
-    // }
+    }
   }
 
   /**
@@ -243,6 +252,10 @@ class Chat extends Component {
       this.setState({
         discoverLoopCounter: this.state.discoverLoopCounter + 1
       }, () => {
+        if (this.state.discoverLoopCounter === 4) {
+          const currentDate = new Date();
+          Meteor._localStorage.setItem("contentOverUntil", currentDate.getTime() + 4 * 3600 * 1000);
+        }
         console.log("--- Keep going! ---");
         this.displayDiscover(this.state.latestDiscover.type, this.getRandomSkill());
       });
