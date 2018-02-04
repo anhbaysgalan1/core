@@ -7,6 +7,7 @@ import LinkBubble from "./LinkBubble";
 import MessageLinkBubble from "./MessageLinkBubble";
 import AvatarBubble from "./AvatarBubble";
 import InAppBrowser from "./InAppBrowser";
+import CategoryCarousel from "../containers/CategoryCarousel";
 
 const ellipsis = keyframes`
   to {
@@ -112,7 +113,7 @@ class Conversation extends Component {
   };
 
   render() {
-    const { messages, suggestions, botIsTyping } = this.props;
+    const { messages, suggestions, botIsTyping, showCategoryPicker, onPickingOver } = this.props;
 
     const suggestionComponents = this.renderSuggestions(suggestions);
 
@@ -121,6 +122,7 @@ class Conversation extends Component {
     return [
       <ConversationWrapper innerRef={wrapper => this.conversationWrapper = wrapper}>
         {messages.map(message => this.renderMessage(message))}
+        {showCategoryPicker && <CategoryCarousel onPickingOver={onPickingOver}/>}
         {suggestionComponents}
         {botIsTyping && <BotIsTyping>{i18n.__("ANORAK_IS_TYPING")}</BotIsTyping>}
       </ConversationWrapper>

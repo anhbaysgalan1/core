@@ -11,8 +11,13 @@ Meteor.startup(() => {
       "slug": "animation"
     },
     {
+      "icon": "architecture.png",
+      "title": "Architecture",
+      "slug": "architecture"
+    },
+    {
       "icon": "art.png",
-      "title": "Art",
+      "title": "Arts & Culture",
       "slug": "art"
     },
     {
@@ -36,9 +41,19 @@ Meteor.startup(() => {
       "slug": "biology"
     },
     {
+      "icon": "business.png",
+      "title": "Business & Management",
+      "slug": "business"
+    },
+    {
       "icon": "chemistry.png",
       "title": "Chemistry",
       "slug": "chemistry"
+    },
+    {
+      "icon": "climate-science.png",
+      "title": "Climate Science",
+      "slug": "climate-science"
     },
     {
       "icon": "code.png",
@@ -48,7 +63,13 @@ Meteor.startup(() => {
     {
       "icon": "curiosity.png",
       "title": "Curiosity",
-      "slug": "curiosity"
+      "slug": "curiosity",
+      "hideAtOnboarding": true
+    },
+    {
+      "icon": "data-science.png",
+      "title": "Data Science",
+      "slug": "data-science"
     },
     {
       "icon": "design.png",
@@ -57,8 +78,13 @@ Meteor.startup(() => {
     },
     {
       "icon": "economics.png",
-      "title": "Economics",
+      "title": "Economics & Finance",
       "slug": "economics"
+    },
+    {
+      "icon": "engineering.png",
+      "title": "Engineering",
+      "slug": "engineering"
     },
     {
       "icon": "startup.png",
@@ -71,11 +97,6 @@ Meteor.startup(() => {
       "slug": "filmmaking"
     },
     {
-      "icon": "finance.png",
-      "title": "Finance",
-      "slug": "finance"
-    },
-    {
       "icon": "fun-facts.png",
       "title": "Fun Facts",
       "slug": "fun-facts"
@@ -84,6 +105,11 @@ Meteor.startup(() => {
       "icon": "history.png",
       "title": "History",
       "slug": "history"
+    },
+    {
+      "icon": "humanities.png",
+      "title": "Humanities",
+      "slug": "humanities"
     },
     {
       "icon": "languages.png",
@@ -106,14 +132,9 @@ Meteor.startup(() => {
       "slug": "mathematics"
     },
     {
-      "icon": "medecine.png",
-      "title": "Medecine",
-      "slug": "medecine"
-    },
-    {
-      "icon": "miscellaneous.png",
-      "title": "Miscellaneous",
-      "slug": "miscellaneous"
+      "icon": "medicine.png",
+      "title": "Medicine",
+      "slug": "medicine"
     },
     {
       "icon": "personal-development.png",
@@ -141,12 +162,17 @@ Meteor.startup(() => {
       "slug": "physics"
     },
     {
+      "icon": "politics.png",
+      "title": "Political Sciences",
+      "slug": "political-sciences"
+    },
+    {
       "icon": "psychology.png",
       "title": "Psychology",
       "slug": "psychology"
     },
     {
-      "icon": "technology.png",
+      "icon": "tech.png",
       "title": "Technology",
       "slug": "technology"
     },
@@ -157,7 +183,7 @@ Meteor.startup(() => {
     }
   ];
 
-  if (Category.find().count() !== categories.length) {
+  if (Category.find().count() < categories.length) {
     categories.forEach((current) => Category.insert(current));
   }
 });

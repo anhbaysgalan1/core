@@ -1,4 +1,9 @@
 {
+  "galaxy.meteor.com": {
+    "env": {
+      "MONGO_URL": "mongodb://undermind_meteor:JpuYwUESmhW3X5Wa@ds117158.mlab.com:17158/undermind"
+    }
+  },
   "mysql": {
     "host": "undermindcore.cflkgiwe0kzr.eu-west-3.rds.amazonaws.com",
     "port": 3306,

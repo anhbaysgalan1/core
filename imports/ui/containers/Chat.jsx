@@ -1,12 +1,14 @@
 import { Meteor } from "meteor/meteor";
 import { Accounts } from "meteor/accounts-base";
 import i18n from "meteor/universe:i18n";
+import _ from "lodash";
 
 import React, { Component } from "react";
 import { compose } from "react-komposer";
 import partOfDay from "humanized-part-of-day";
 
 import { Conversation, MessageBox, Header, LongPressMenu } from "../components";
+import { getCategoryBySlug } from "/imports/api/Category";
 
 class Chat extends Component {
   constructor() {
@@ -25,11 +27,11 @@ class Chat extends Component {
       gender: "",
       isLongPressMenuOpen: false,
       linkClickCounter: 0,
-      discoverLoopCounter: 0
+      discoverLoopCounter: 0,
+      showCategoryPicker: false
     };
 
     if (Meteor.user()) {
-
       this.state = {
         ...this.state,
         conversation: [],
@@ -94,6 +96,28 @@ class Chat extends Component {
       });
   }
 
+  getRandomSkill() {
+    const userSkills = Meteor.user().profile.skills;
+
+    let randomSkill = _.sample(userSkills).slug;
+
+    console.log("randomSkill", randomSkill);
+
+    console.log("latestDiscover", this.state.latestDiscover);
+
+    while (this.state.latestDiscover && randomSkill.title === this.state.latestDiscover.skill) {
+      randomSkill = _.sample(userSkills).slug;
+
+      console.log("randomSkill matched latest one, so a new one was picked:", randomSkill);
+    }
+
+    const skill = getCategoryBySlug(randomSkill).title;
+
+    console.log("skill", skill);
+
+    return skill;
+  }
+
   showBriefing() {
     this.sendJinaResponse(i18n.__("ANORAK_BRIEFING_INTRO"))
       .then(() => this.awaitSuggestionChoice([
@@ -104,12 +128,35 @@ class Chat extends Component {
       .then((message) => {
         this.setState({ onSuggestionChoice: null });
 
+        const skill = this.getRandomSkill();
+
         if (message.includes(i18n.__("VIDEO"))) {
-          this.displayDiscover("video");
+          this.setState({
+            latestDiscover: {
+              skill,
+              type: "video"
+            }
+          });
+
+          this.displayDiscover("video", skill);
         } else if (message.includes(i18n.__("COURSE"))) {
-          this.displayDiscover("classes");
+          this.setState({
+            latestDiscover: {
+              skill,
+              type: "classes"
+            }
+          });
+
+          this.displayDiscover("classes", skill);
         } else if (message.includes(i18n.__("ARTICLE"))) {
-          this.displayDiscover("article");
+          this.setState({
+            latestDiscover: {
+              skill,
+              type: "article"
+            }
+          });
+
+          this.displayDiscover("article", skill);
         } else {
           this.sendJinaResponse(i18n.__("ANORAK_UNDERSTANDING_ERROR"));
         }
@@ -120,12 +167,15 @@ class Chat extends Component {
    * Display data from the Discover Program (random atm)
    *
    * @param type
+   * @param skill
    */
 
-  displayDiscover(type) {
-    if (this.state.discoverLoopCounter < 2) {
-      this.sendJinaResponse(i18n.__("BEFORE_SHOWING_CONTENT"))
-        .then(() => Meteor.callPromise("content/getRandomFromCategory", type))
+  displayDiscover(type, skill) {
+    console.log(`displayDiscover(${type}, ${skill})`);
+
+    // if (this.state.discoverLoopCounter < 2) {
+      this.sendJinaResponse(i18n.__("BEFORE_SHOWING_CONTENT", { skill }))
+        .then(() => Meteor.callPromise("content/getRandomFromCategory", type, skill))
         .then((content) => {
           console.log("content:", content);
 
@@ -141,13 +191,28 @@ class Chat extends Component {
 
           filteredContent.push(i18n.__("CONTINUE_DISCOVER_PROGRAM"));
 
+          console.log("Omitting latest content type", this.state.latestDiscover.type);
+
+          const lastContentType = this.state.latestDiscover.type;
+
+          if (lastContentType === "video") {
+            filteredContent.push(i18n.__("SUGGESTION_ARTICLE"));
+            filteredContent.push(i18n.__("SUGGESTION_COURSE"));
+          } else if (lastContentType === "article") {
+            filteredContent.push(i18n.__("SUGGESTION_VIDEO"));
+            filteredContent.push(i18n.__("SUGGESTION_COURSE"));
+          } else {
+            filteredContent.push(i18n.__("SUGGESTION_VIDEO"));
+            filteredContent.push(i18n.__("SUGGESTION_ARTICLE"));
+          }
+
           console.log("filtered content:", filteredContent);
 
           return this.awaitSuggestionChoice(filteredContent);
         });
-    } else {
-      this.sendJinaResponse(i18n.__("CONTENT_OVER"))
-    }
+    // } else {
+    //   this.sendJinaResponse(i18n.__("CONTENT_OVER"))
+    // }
   }
 
   /**
@@ -177,7 +242,10 @@ class Chat extends Component {
     if (typedMessage.includes(i18n.__("KEEP_GOING"))) {
       this.setState({
         discoverLoopCounter: this.state.discoverLoopCounter + 1
-      }, () => this.displayDiscover("article"));
+      }, () => {
+        console.log("--- Keep going! ---");
+        this.displayDiscover(this.state.latestDiscover.type, this.getRandomSkill());
+      });
     }
 
     const userIsTypingPassword = (authenticating && userName.length > 0) ||
@@ -205,6 +273,19 @@ class Chat extends Component {
     if (onSuggestionChoice) {
       console.log("Got onSuggestionChoice", onSuggestionChoice);
       console.log("Suggestions", this.state.suggestions);
+
+      if (this.state.latestDiscover) {
+        if (typedMessage.includes(i18n.__("VIDEO"))) {
+          console.log("--- GOT VIDEO BITCHEEEEES");
+          this.displayDiscover("video", this.state.latestDiscover.skill);
+        } else if (typedMessage.includes(i18n.__("ARTICLE"))) {
+          console.log("--- GOT ARTICLE BITCHEEEEES");
+          this.displayDiscover("article", this.state.latestDiscover.skill);
+        } else if (typedMessage.includes(i18n.__("COURSE"))) {
+          console.log("--- GOT COURSE BITCHEEEEES");
+          this.displayDiscover("classes", this.state.latestDiscover.skill);
+        }
+      }
 
       this.setState({ conversation, typedMessage: "" });
 
@@ -241,60 +322,54 @@ class Chat extends Component {
           level: 1,
           xp: 0,
           tokens: 0,
-          skills: [
-            {
-              "slug": "astronomy",
-              "xp": 0,
-              "xpMax": 10000,
-              "rank": "First class"
-            },
-            {
-              "slug": "curiosity",
-              "xp": 0,
-              "xpMax": 10000,
-              "rank": "First class"
-            },
-            {
-              "slug": "chemistry",
-              "xp": 0,
-              "xpMax": 10000,
-              "rank": "First class"
-            },
-            {
-              "slug": "startup",
-              "xp": 0,
-              "xpMax": 10000,
-              "rank": "First class"
-            },
-            {
-              "slug": "philosophy",
-              "xp": 0,
-              "xpMax": 10000,
-              "rank": "First class"
-            },
-            {
-              "slug": "tech",
-              "xp": 0,
-              "xpMax": 10000,
-              "rank": "First class"
-            }
-          ]
+          // skills: [
+          //   {
+          //     "slug": "astronomy",
+          //     "xp": 0,
+          //     "xpMax": 10000,
+          //     "rank": "First class"
+          //   },
+          //   {
+          //     "slug": "curiosity",
+          //     "xp": 0,
+          //     "xpMax": 10000,
+          //     "rank": "First class"
+          //   },
+          //   {
+          //     "slug": "chemistry",
+          //     "xp": 0,
+          //     "xpMax": 10000,
+          //     "rank": "First class"
+          //   },
+          //   {
+          //     "slug": "startup",
+          //     "xp": 0,
+          //     "xpMax": 10000,
+          //     "rank": "First class"
+          //   },
+          //   {
+          //     "slug": "philosophy",
+          //     "xp": 0,
+          //     "xpMax": 10000,
+          //     "rank": "First class"
+          //   },
+          //   {
+          //     "slug": "tech",
+          //     "xp": 0,
+          //     "xpMax": 10000,
+          //     "rank": "First class"
+          //   }
+          // ]
         }
       }, (err) => {
         if (err) {
           this.sendJinaResponse(i18n.__("JINA_ERROR_SOMETHING_WENT_WRONG", { err }));
         } else {
           // Greet new user
-          this.sendJinaResponse(i18n.__("ANORAK_REGISTRATION_WELCOME_1"))
-            .then(() => this.sendJinaResponse(i18n.__("ANORAK_REGISTRATION_WELCOME_2")))
-            .then(() => {
-              this.setState({ registering: false });
 
-              return this.sendJinaResponse(i18n.__("ANORAK_REGISTRATION_WELCOME_3"));
-            })
-            .then(() => this.awaitSuggestionChoice([i18n.__("SUGGESTION_I_M_READY")]))
-            .then(() => this.greet());
-        }
+          this.sendJinaResponse(i18n.__("ANORAK_REGISTRATION_CATEGORY_PICK"))
+            .then(() => this.setState({ showCategoryPicker: true }));
+          }
       });
     }
     // If user has typed username but hasn't typed password yet
@@ -577,6 +652,35 @@ class Chat extends Component {
     }
   }
 
+  handleCategoryPickingOver = (categories) => {
+    this.setState({ showCategoryPicker: false });
+
+    const skills = categories.map(currentCategory => {
+      return {
+        "slug": currentCategory,
+        "xp": 0,
+        "xpMax": 10000,
+        "rank": "First class"
+      };
+    });
+
+    Meteor.users.update(Meteor.userId(), {
+      $set: {
+        "profile.skills": skills
+      }
+    });
+
+    this.sendJinaResponse(i18n.__("ANORAK_REGISTRATION_WELCOME_1"))
+      .then(() => this.sendJinaResponse(i18n.__("ANORAK_REGISTRATION_WELCOME_2")))
+      .then(() => {
+        this.setState({ registering: false });
+
+        return this.sendJinaResponse(i18n.__("ANORAK_REGISTRATION_WELCOME_3"));
+      })
+      .then(() => this.awaitSuggestionChoice([i18n.__("SUGGESTION_I_M_READY")]))
+      .then(() => this.greet());
+  }
+
   handleSaveForLater = () => {
     console.log("handleSaveForLater for link id", this.state.longPressedLink.id);
 
@@ -613,10 +717,12 @@ class Chat extends Component {
         messages={this.state.conversation}
         suggestions={this.state.suggestions}
         botIsTyping={this.state.isTyping}
+        showCategoryPicker={this.state.showCategoryPicker}
         onSuggestionClicked={this.handleSuggestionClicked}
         onAvatarClicked={this.handleAvatarClicked}
         onLinkLongPress={this.handleLinkLongPress}
         onLinkClickStop={this.handleLinkClickStop}
+        onPickingOver={this.handleCategoryPickingOver}
       />,
       <LongPressMenu
         visible={this.state.isLongPressMenuOpen}
@@ -655,7 +761,7 @@ function getTrackerLoader(reactiveMapper) {
 function dataLoader(props, onData) {
   console.log("--- Chat dataLoader with props ---", props);
 
-  if (Meteor.subscribe("users").ready()) {
+  if (Meteor.subscribe("users").ready() && Meteor.subscribe("categories").ready()) {
     onData(null, {
       user: Meteor.user()
     });

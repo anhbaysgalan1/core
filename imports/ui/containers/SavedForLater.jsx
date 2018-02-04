@@ -1,9 +1,6 @@
 import { Meteor } from "meteor/meteor";
-import { MysqlSubscription } from "meteor/numtel:mysql";
-
 import React, { Component } from "react";
 import { compose } from "react-komposer";
-
 import SavedForLaterComponent from "../components/SavedForLater";
 import Header from "../components/Header";
 
