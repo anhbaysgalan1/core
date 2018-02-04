@@ -30,7 +30,14 @@ Meteor.methods({
     return await connection.query(query);
   },
 
-  "content/report": (id) => {
-    // Meteor.send
+  "content/report": (link) => {
+    import { Email } from "meteor/email";
+
+    Email.send({
+      from: "undermindops@gmail.com",
+      to: "undermindops@gmail.com",
+      subject: "New content reported",
+      text: `The following content was reported by user ${Meteor.user().username}: ${link}`
+    });
   }
 });

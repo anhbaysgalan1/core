@@ -8,5 +8,6 @@
     "minInterval": 200,
     "database": "undermind_core"
   },
-  "segmentWriteKey": "7PXhNvKLVrmtCivWKoldzvcvjCnp1s2E"
+  "segmentWriteKey": "7PXhNvKLVrmtCivWKoldzvcvjCnp1s2E",
+  "MAIL_URL": "smtp://undermindops%40gmail.com:If%40%40l%40sLvbQf!8dU@smtp.gmail.com:587"
 }

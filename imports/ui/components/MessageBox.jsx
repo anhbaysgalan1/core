@@ -61,6 +61,30 @@ const RoundButton = styled.a`
   }
 `;
 
+const RoundButtonThatIsActuallyADamnButton = styled.button`
+  display: block;
+  
+  border: none;
+  border-radius: 50%;
+  
+  width: 1.5rem;
+  height: 1.5rem;
+  
+  ${props => props.right && `position: absolute;`}
+  ${props => props.right ? `right` : `left`}: .9rem;
+  bottom: .9rem;
+  
+  padding: 0;
+  
+  ${props => props.isOpen && `transform: rotate(-90deg);`}
+  
+  transition: all 300ms ease;
+  
+  img {
+    height: 100%;
+  }
+`;
+
 const MoreMenu = styled.nav`  
   width: 3rem;
   
@@ -146,13 +170,12 @@ class MessageBox extends Component {
             {/*<img src={`/notifications.png`} />*/}
           {/*</RoundButton>*/}
         </MoreMenu>
-        <MessageBoxWrapper onSubmit={this.props.onSend}>
+        <MessageBoxWrapper innerRef={node => this.form = node} onSubmit={this.props.onSend}>
           <RoundButton
             onClick={this.toggleMoreMenu}
             isOpen={this.state.isMoreMenuOpen}
-            type={`button`}
           >
-            <img src={`/more.svg`} />
+            <img src={`/more${this.state.isMoreMenuOpen ? "-blue" : ""}.svg`} />
           </RoundButton>
           <MessageInput
             type={this.props.isRecordingPassword ? `password` : `text`}
@@ -161,9 +184,9 @@ class MessageBox extends Component {
             onChange={this.props.onChange}
             innerRef={node => this.props.setMessageInputRef(node)}
           />
-          <RoundButton type={`submit`} right>
+          <RoundButtonThatIsActuallyADamnButton type={"submit"} right>
             <img src={`/send.svg`} />
-          </RoundButton>
+          </RoundButtonThatIsActuallyADamnButton>
         </MessageBoxWrapper>
       </MessageBoxAndSuggestions>
     );

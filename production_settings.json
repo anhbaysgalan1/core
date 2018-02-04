@@ -1,7 +1,8 @@
 {
   "galaxy.meteor.com": {
     "env": {
-      "MONGO_URL": "mongodb://undermind_meteor:JpuYwUESmhW3X5Wa@ds117158.mlab.com:17158/undermind"
+      "MONGO_URL": "mongodb://undermind_meteor:JpuYwUESmhW3X5Wa@ds117158.mlab.com:17158/undermind",
+      "MAIL_URL": "smtp://undermindops%40gmail.com:If%40%40l%40sLvbQf!8dU@smtp.gmail.com:587"
     }
   },
   "mysql": {

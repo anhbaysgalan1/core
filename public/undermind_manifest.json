@@ -1,0 +1,42 @@
+{
+  "name": "Undermind",
+  "short_name": "Undermind",
+  "theme_color": "#0f90d1",
+  "background_color": "#ffffff",
+  "display": "standalone",
+  "orientation": "portrait",
+  "start_url": "/",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "/undermind_16.png",
+      "sizes": "16x16",
+      "type": "image/png"
+    },
+    {
+      "src": "/undermind_32.png",
+      "sizes": "32x32",
+      "type": "image/png"
+    },
+    {
+      "src": "/undermind_150.png",
+      "sizes": "150x150",
+      "type": "image/png"
+    },
+    {
+      "src": "/undermind_192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/undermind_512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "/undermind.png",
+      "sizes": "1000x1000",
+      "type": "image/png"
+    }
+  ]
+}
