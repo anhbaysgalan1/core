@@ -60,6 +60,9 @@ const BackButton = styled.button`
   
   position: absolute;
   left: 1rem;
+  
+  background: transparent;
+  border: none;
 `;
 
 const SavedForLater = ({ content, history }) => (

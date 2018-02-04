@@ -185,8 +185,7 @@ class Chat extends Component {
     if (Meteor._localStorage.getItem("contentOverUntil")) {
       this.sendJinaResponse(i18n.__("CONTENT_OVER"))
     } else {
-      this.sendJinaResponse(i18n.__("BEFORE_SHOWING_CONTENT", { skill }))
-        .then(() => Meteor.callPromise("content/getRandomFromCategory", type, skill))
+        Meteor.callPromise("content/getRandomFromCategory", type, skill)
         .then((content) => {
           console.log("content:", content);
 
@@ -199,6 +198,12 @@ class Chat extends Component {
             image: row.image || "http://via.placeholder.com/150x100",
             description: row.description || "Lorem ipsum dolor sit amet..."
           }));
+
+          if (filteredContent.length < 1) {
+            this.sendJinaResponse(i18n.__("NO_CONTENT_IN_CATEGORY", { skill, type }));
+          } else {
+            this.sendJinaResponse(i18n.__("BEFORE_SHOWING_CONTENT", { skill }))
+          }
 
           filteredContent.push(i18n.__("CONTINUE_DISCOVER_PROGRAM"));
 
@@ -620,7 +625,7 @@ class Chat extends Component {
       this.setState({
         linkClickCounter: this.state.linkClickCounter + 1 // For some reason, the click event is fired twice. Here we wait for the second one.
       }, () => {
-        if (this.state.linkClickCounter >= 2) {
+        // if (this.state.linkClickCounter >= 2) {
           console.log("::: Clicked on link", link);
 
           this.sendJinaResponse(i18n.__("ANORAK_DID_YOU_FINISH"))
@@ -660,7 +665,7 @@ class Chat extends Component {
             });
 
           this.setState({ linkClickCounter: 0 });
-        }
+        // }
       });
     }
   }
@@ -712,7 +717,7 @@ class Chat extends Component {
   handleReport = () => {
     console.log("handleReport for link id", this.state.longPressedLink.id);
 
-    Meteor.call("content/report", this.state.longPressedLink.id);
+    Meteor.call("content/report", this.state.longPressedLink.link);
 
     this.setState({
       isLongPressMenuOpen: false,
