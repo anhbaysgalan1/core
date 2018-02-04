@@ -136,15 +136,15 @@ class MessageBox extends Component {
           <RoundButton href={"https://undermind.typeform.com/to/ctkhrr"} target={"_blank"}>
             <img src={`/bug.png`} />
           </RoundButton>
-          <RoundButton onClick={this.toggleMoreMenu}>
-            <img src={`/settings.png`} />
-          </RoundButton>
+          {/*<RoundButton onClick={this.toggleMoreMenu}>*/}
+            {/*<img src={`/settings.png`} />*/}
+          {/*</RoundButton>*/}
           <RoundButton onClick={() => this.props.history.push("/savedForLater")}>
             <img src={`/saveforlater.png`} />
           </RoundButton>
-          <RoundButton onClick={this.toggleMoreMenu}>
-            <img src={`/notifications.png`} />
-          </RoundButton>
+          {/*<RoundButton onClick={this.toggleMoreMenu}>*/}
+            {/*<img src={`/notifications.png`} />*/}
+          {/*</RoundButton>*/}
         </MoreMenu>
         <MessageBoxWrapper onSubmit={this.props.onSend}>
           <RoundButton
