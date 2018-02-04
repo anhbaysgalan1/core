@@ -91,12 +91,10 @@ function getTrackerLoader(reactiveMapper) {
 }
 
 function dataLoader(props, onData) {
-  if (Meteor.subscribe("users").ready()
-    // && Meteor.subscribe("categories").ready()
+  if (Meteor.subscribe("users").ready() && Meteor.subscribe("categories").ready()
   ) {
     onData(null, {
-      userProfile: Meteor.user() && Meteor.user().profile//,
-      // categories: getAllCategories()
+      userProfile: Meteor.user() && Meteor.user().profile
     });
   }
 }

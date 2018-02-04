@@ -22,6 +22,7 @@
     "font-awesome": "^4.7.0",
     "history": "^3.0.0",
     "humanized-part-of-day": "^1.0.0",
+    "meteor-desktop-localstorage": "0.0.11",
     "meteor-node-stubs": "^0.3.2",
     "mysql": "^2.15.0",
     "normalize.css": "^7.0.0",

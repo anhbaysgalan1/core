@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import styled from "styled-components";
+import { getCategoryBySlug } from "/imports/api/Category";
 
 const SubjectWrapper = styled.div`
   display: flex;
@@ -31,7 +32,7 @@ class UserSubjects extends Component {
       <SubjectWrapper>
         {subjects.map((subject, index) => (
           <Subject key={index}>
-            <Icon src={`/icons/${subject.slug}.png`} />
+            <Icon src={`/icons/${getCategoryBySlug(subject.slug).icon}`} />
             <div>
               <p>{subject.xp}/{subject.xpMax}</p>
               <p>{subject.rank}</p>
