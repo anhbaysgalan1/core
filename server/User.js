@@ -1,6 +1,7 @@
 import { Meteor } from "meteor/meteor";
 import { Accounts } from "meteor/accounts-base";
 import slugify from "slugify";
+import { Category } from "./Category";
 
 Meteor.publish("users", () => Meteor.users.find({   }));
 
@@ -47,7 +48,9 @@ Meteor.methods({
       console.log("Checking skill", skills[skill]);
       console.log("Looking for", categoriesAsArray);
 
-      if (categoriesAsArray.includes(skills[skill].slug)) {
+      const skillSlug = Category.findOne({ slug: skills[skill].slug }).slug;
+
+      if (categoriesAsArray.includes(skillSlug)) {
         currentSkillXp = skills[skill].xp;
 
         for (const category in categoriesAsArray) {
@@ -83,13 +86,15 @@ Meteor.methods({
       })
     }
 
-    // if (skillIndex) {
-    //   Meteor.users.update(Meteor.userId(), {
-    //     $set: {
-    //       `profile.skills.${skillIndex}.xp`: currentSkillXp + addedXp
-    //     }
-    //   });
-    // }
+    if (skillIndex) {
+      const selector = `profile.skills.${skillIndex}.xp`;
+
+      Meteor.users.update(Meteor.userId(), {
+        $set: {
+          [selector]: currentSkillXp + addedXp
+        }
+      });
+    }
 
     return {
       addedTokens,

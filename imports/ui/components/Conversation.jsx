@@ -106,7 +106,7 @@ class Conversation extends Component {
     if (message.link) {
       return (<MessageLinkBubble link={message} />);
     } else if (message.type && message.type === "image") {
-      return this.renderAvatar(message);
+      return this.renderAvatar(message, message.hasOwnProperty("isBot") ? message.isBot : false);
     }
 
     return (<MessageBubble message={message} />);

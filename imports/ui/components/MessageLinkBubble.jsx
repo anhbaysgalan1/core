@@ -26,7 +26,7 @@ const RightArrow = styled.span`
 
 const MessageLinkBubble = ({ link }) => (
   <BubbleWrapper sender={"jina"} link>
-    <LinkWrapper href={link.link} target={"_blank"}>
+    <LinkWrapper href={"#"} onClick={() => window.open(link.link, "_system")}>
       <StyledBubble
         sender={"jina"}
         link

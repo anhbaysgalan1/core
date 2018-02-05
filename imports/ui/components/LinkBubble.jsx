@@ -34,7 +34,7 @@ const Description = styled.span`
 const LinkBubble = ({ link, onLongPress, onClickStop }) => (
   <BubbleWrapper sender={"me"} suggestion link>
     <ClickAndHold onEnd={onClickStop} onClickNHold={onLongPress} time={1}>
-      <LinkWrapper href={link.link} target={"_blank"}>
+      <LinkWrapper href={"#"} onClick={() => window.open(link.link, "_system")}>
         <Bubble
           sender={"me"}
           suggestion

@@ -82,6 +82,7 @@ const RoundButtonThatIsActuallyADamnButton = styled.button`
   
   img {
     height: 100%;
+    background: white;
   }
 `;
 
@@ -151,13 +152,22 @@ class MessageBox extends Component {
           {/*onSuggestionClicked={this.props.onSuggestionClicked}*/}
         {/*/>*/}
         <MoreMenu isOpen={this.state.isMoreMenuOpen}>
-          <RoundButton href={"https://undermind.typeform.com/to/DxEfih"} target={"_blank"}>
+          <RoundButton
+            href={"#"}
+            onClick={() => window.open("https://undermind.typeform.com/to/DxEfih", "_system")}
+          >
             <img src={`/question.png`} />
           </RoundButton>
-          <RoundButton href={"https://undermind.typeform.com/to/QgwOAs"} target={"_blank"}>
+          <RoundButton
+            href={"#"}
+            onClick={() => window.open("https://undermind.typeform.com/to/QgwOAs", "_system")}
+          >
             <img src={`/add-course.png`} />
           </RoundButton>
-          <RoundButton href={"https://undermind.typeform.com/to/ctkhrr"} target={"_blank"}>
+          <RoundButton
+            href={"#"}
+            onClick={() => window.open("https://undermind.typeform.com/to/ctkhrr", "_system")}
+          >
             <img src={`/bug.png`} />
           </RoundButton>
           {/*<RoundButton onClick={this.toggleMoreMenu}>*/}
