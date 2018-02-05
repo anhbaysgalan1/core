@@ -72,7 +72,7 @@ const SavedForLater = ({ content, history }) => (
       <h2>Saved courses</h2>
     </NavigationRow>
     {content.map((currentContent, index) => (
-      <ContentRow key={index} href={currentContent.link}>
+      <ContentRow key={index} href={"#"} onClick={() => window.open(currentContent.link, "_system")}>
         <div>
           <Community>{currentContent.community}</Community>
           <Title>{currentContent.title}</Title>

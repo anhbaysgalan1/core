@@ -24,6 +24,7 @@ const Icon = styled.img`
 
 const Anorak = styled.img`
   display: ${props => props.visible ? `block` : `none`};
+  width: 3rem;
 `;
 
 class Header extends Component {

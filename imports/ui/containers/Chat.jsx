@@ -625,7 +625,7 @@ class Chat extends Component {
       this.setState({
         linkClickCounter: this.state.linkClickCounter + 1 // For some reason, the click event is fired twice. Here we wait for the second one.
       }, () => {
-        // if (this.state.linkClickCounter >= 2) {
+        if (this.state.linkClickCounter >= 2) {
           console.log("::: Clicked on link", link);
 
           this.sendJinaResponse(i18n.__("ANORAK_DID_YOU_FINISH"))
@@ -665,7 +665,7 @@ class Chat extends Component {
             });
 
           this.setState({ linkClickCounter: 0 });
-        // }
+        }
       });
     }
   }
