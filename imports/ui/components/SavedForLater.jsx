@@ -10,7 +10,7 @@ const NavigationRow = styled.div`
   position: relative;
 `;
 
-const ContentRow = styled.a`
+const ContentRow = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -21,11 +21,17 @@ const ContentRow = styled.a`
   
   border-top: 1px solid black;
   
-  text-decoration: none;
-  
   &:last-child {
     border-bottom: 1px solid black;
   }
+`;
+
+const Link = styled.a`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  
+  text-decoration: none;
 `;
 
 const Community = styled.h4`
@@ -65,21 +71,34 @@ const BackButton = styled.button`
   border: none;
 `;
 
-const SavedForLater = ({ content, history }) => (
+const TrashButton = styled.button`
+  width: 3rem;
+  text-align: right;
+  
+  background: transparent;
+  border: none;
+`;
+
+const SavedForLater = ({ content, history, onDelete }) => (
   <div>
     <NavigationRow>
       <BackButton onClick={() => history.push("/")}><i className={"fa fa-chevron-left"} /></BackButton>
       <h2>Saved courses</h2>
     </NavigationRow>
     {content.map((currentContent, index) => (
-      <ContentRow key={index} href={"#"} onClick={() => window.open(currentContent.link, "_system")}>
-        <div>
-          <Community>{currentContent.community}</Community>
-          <Title>{currentContent.title}</Title>
-        </div>
-        <div>
-          <Thumbnail src={currentContent.image || "http://via.placeholder.com/150x100"} />
-        </div>
+      <ContentRow key={index}>
+        <Link href={"#"} onClick={() => window.open(currentContent.link, "_system")}>
+          <div>
+            <Community>{currentContent.community}</Community>
+            <Title>{currentContent.title}</Title>
+          </div>
+          <div>
+            <Thumbnail src={currentContent.image || "http://via.placeholder.com/150x100"} />
+          </div>
+        </Link>
+        <TrashButton onClick={() => onDelete(currentContent, index)}>
+          <i className="fa fa-trash-o" />
+        </TrashButton>
       </ContentRow>
     ))}
   </div>

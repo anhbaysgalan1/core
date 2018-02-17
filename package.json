@@ -23,6 +23,7 @@
     "core-js": "^2.5.3",
     "font-awesome": "^4.7.0",
     "history": "^3.0.0",
+    "html-entities": "^1.2.1",
     "humanized-part-of-day": "^1.0.0",
     "meteor-desktop-localstorage": "0.0.11",
     "meteor-node-stubs": "^0.3.2",

@@ -209,7 +209,11 @@ class Chat extends Component {
               }
             });
 
-            this.sendJinaResponse(i18n.__("BEFORE_SHOWING_CONTENT", { skill }), { noDelay: true });
+            import { AllHtmlEntities } from "html-entities";
+
+            const entities = new AllHtmlEntities();
+
+            this.sendJinaResponse(i18n.__("BEFORE_SHOWING_CONTENT", { skill: entities.decode(skill) }), { noDelay: true });
           }
 
           filteredContent.push(i18n.__("CONTINUE_DISCOVER_PROGRAM"));

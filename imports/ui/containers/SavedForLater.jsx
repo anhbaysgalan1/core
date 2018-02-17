@@ -5,22 +5,40 @@ import SavedForLaterComponent from "../components/SavedForLater";
 import Header from "../components/Header";
 
 class SavedForLater extends Component {
-  constructor() {
+  constructor(props) {
     super();
 
     console.log("SavedForLater.constructor");
+
+    this.state = {
+      content: props.content
+    };
   }
+
+  handleDeleteSavedCourse = (content, stateIndex) => {
+    console.log("handleDeleteSavedCourse", stateIndex);
+
+    const stateContent = this.state.content;
+    stateContent.splice(stateIndex, 1);
+
+    this.setState({ content: stateContent });
+
+    Meteor.call("removeSavedForLaterContent", content.row_id);
+  }
+
   render() {
+    console.log("State:", this.state);
     console.log("Props:", this.props);
 
-    console.log("Got content", this.props.content);
-    console.log("Mapping content", this.props.content.map((current) => current.link));
+    console.log("Got content", this.state.content);
+    console.log("Mapping content", this.state.content.map((current) => current.link));
 
     return [
       <Header {...this.props} />,
       <SavedForLaterComponent
         {...this.props}
-        content={this.props.content}
+        content={this.state.content}
+        onDelete={this.handleDeleteSavedCourse}
       />
     ];
   }
@@ -49,8 +67,7 @@ async function dataLoader(props, onData) {
   console.log("Got da content!", saveForLaterContent);
 
   onData(null, {
-    content: saveForLaterContent,
-    test: "Hello World"
+    content: saveForLaterContent
   });
 }
 
