@@ -50,9 +50,30 @@ class Chat extends Component {
   }
 
   awaitSuggestionChoice = (suggestions) => new Promise((resolve, reject) => {
+    const displayedSuggestions = [];
+
+    for (const suggestionIndex in suggestions) {
+      if (suggestions.hasOwnProperty(suggestionIndex)) {
+        console.log("awaitSuggestionChoice > iterating over", suggestions[suggestionIndex]);
+
+        const delay = (suggestionIndex + 1) * 30;
+
+        if (suggestions[suggestionIndex].image) {
+          (new Image()).src = suggestions[suggestionIndex].image;
+        }
+
+        setTimeout(() => {
+          displayedSuggestions.push(suggestions[suggestionIndex]);
+
+          this.setState({
+            suggestions: displayedSuggestions
+          });
+        }, delay);
+      }
+    }
+
     this.setState({
-      onSuggestionChoice: resolve, // Passing the resolve reference
-      suggestions: suggestions
+      onSuggestionChoice: resolve // Passing the resolve reference
     });
   });
 
@@ -99,23 +120,23 @@ class Chat extends Component {
   getRandomSkill() {
     const userSkills = Meteor.user().profile.skills;
 
-    let randomSkill = _.sample(userSkills).slug;
+    const randomSkill = _.sample(userSkills).slug;
 
     console.log("randomSkill", randomSkill);
 
     console.log("latestDiscover", this.state.latestDiscover);
 
-    while (this.state.latestDiscover && randomSkill.title === this.state.latestDiscover.skill) {
-      randomSkill = _.sample(userSkills).slug;
+    const skillTitle = getCategoryBySlug(randomSkill).title;
 
-      console.log("randomSkill matched latest one, so a new one was picked:", randomSkill);
+    if (this.state.latestDiscover && skillTitle === this.state.latestDiscover.skill) {
+      console.log("randomSkill matched latest one, so a new one was picked");
+
+      return this.getRandomSkill();
     }
 
-    const skill = getCategoryBySlug(randomSkill).title;
+    console.log("skill", skillTitle);
 
-    console.log("skill", skill);
-
-    return skill;
+    return skillTitle;
   }
 
   showBriefing() {
@@ -139,31 +160,10 @@ class Chat extends Component {
           const skill = this.getRandomSkill();
 
           if (message.includes(i18n.__("VIDEO"))) {
-            this.setState({
-              latestDiscover: {
-                skill,
-                type: "video"
-              }
-            });
-
             this.displayDiscover("video", skill);
           } else if (message.includes(i18n.__("COURSE"))) {
-            this.setState({
-              latestDiscover: {
-                skill,
-                type: "classes"
-              }
-            });
-
             this.displayDiscover("classes", skill);
           } else if (message.includes(i18n.__("ARTICLE"))) {
-            this.setState({
-              latestDiscover: {
-                skill,
-                type: "article"
-              }
-            });
-
             this.displayDiscover("article", skill);
           } else {
             this.sendJinaResponse(i18n.__("ANORAK_UNDERSTANDING_ERROR"));
@@ -182,7 +182,7 @@ class Chat extends Component {
   displayDiscover(type, skill) {
     console.log(`displayDiscover(${type}, ${skill})`);
 
-    if (Meteor._localStorage.getItem("contentOverUntil")) {
+    if (Meteor._localStorage.getItem("contentOverUntil") && Meteor._localStorage.getItem("contentOverUntil") > new Date().getTime()) {
       this.sendJinaResponse(i18n.__("CONTENT_OVER"))
     } else {
         Meteor.callPromise("content/getRandomFromCategory", type, skill)
@@ -200,27 +200,21 @@ class Chat extends Component {
           }));
 
           if (filteredContent.length < 1) {
-            this.sendJinaResponse(i18n.__("NO_CONTENT_IN_CATEGORY", { skill, type }));
+            return this.displayDiscover(type, this.getRandomSkill());
           } else {
-            this.sendJinaResponse(i18n.__("BEFORE_SHOWING_CONTENT", { skill }))
+            this.setState({
+              latestDiscover: {
+                skill,
+                type
+              }
+            });
+
+            this.sendJinaResponse(i18n.__("BEFORE_SHOWING_CONTENT", { skill }), { noDelay: true });
           }
 
           filteredContent.push(i18n.__("CONTINUE_DISCOVER_PROGRAM"));
-
-          console.log("Omitting latest content type", this.state.latestDiscover.type);
-
-          const lastContentType = this.state.latestDiscover.type;
-
-          if (lastContentType === "video") {
-            filteredContent.push(i18n.__("SUGGESTION_ARTICLE"));
-            filteredContent.push(i18n.__("SUGGESTION_COURSE"));
-          } else if (lastContentType === "article") {
-            filteredContent.push(i18n.__("SUGGESTION_VIDEO"));
-            filteredContent.push(i18n.__("SUGGESTION_COURSE"));
-          } else {
-            filteredContent.push(i18n.__("SUGGESTION_VIDEO"));
-            filteredContent.push(i18n.__("SUGGESTION_ARTICLE"));
-          }
+          filteredContent.push(i18n.__("CHANGE_CATEGORY"));
+          filteredContent.push(i18n.__("START_OVER"));
 
           console.log("filtered content:", filteredContent);
 
@@ -253,16 +247,29 @@ class Chat extends Component {
 
     this.setState({ suggestions: [] });
 
-    if (typedMessage.includes(i18n.__("KEEP_GOING"))) {
+    if (typedMessage.includes(i18n.__("CONTINUE_DISCOVER_PROGRAM")) ||
+      typedMessage.includes(i18n.__("CHANGE_CATEGORY")) ||
+      typedMessage.includes(i18n.__("START_OVER"))) {
       this.setState({
         discoverLoopCounter: this.state.discoverLoopCounter + 1
       }, () => {
-        if (this.state.discoverLoopCounter === 4) {
+        if (this.state.discoverLoopCounter === 7) {
           const currentDate = new Date();
           Meteor._localStorage.setItem("contentOverUntil", currentDate.getTime() + 4 * 3600 * 1000);
         }
         console.log("--- Keep going! ---");
-        this.displayDiscover(this.state.latestDiscover.type, this.getRandomSkill());
+
+        if (typedMessage.includes(i18n.__("CONTINUE_DISCOVER_PROGRAM"))) {
+          this.displayDiscover(this.state.latestDiscover.type, this.state.latestDiscover.skill);
+        } else if (typedMessage.includes(i18n.__("CHANGE_CATEGORY"))) {
+          this.displayDiscover(this.state.latestDiscover.type, this.getRandomSkill());
+        } else if (typedMessage.includes(i18n.__("START_OVER"))) {
+          console.log("Start over");
+
+          this.setState({ latestDiscover: null });
+
+          this.showBriefing();
+        }
       });
     }
 
@@ -275,7 +282,7 @@ class Chat extends Component {
 
       typedMessage = Array.prototype.map.call(typedMessage, () => "●");
     }
-    
+
     // Push message to conversation
     conversation.push({ sender: "me", text: typedMessage });
 
@@ -656,7 +663,9 @@ class Chat extends Component {
             ]))
             .then((choice) => {
               if (choice.includes(i18n.__("SUGGESTION_YES"))) {
-                return this.showBriefing();
+                const skill = this.getRandomSkill();
+
+                return this.displayDiscover(this.state.latestDiscover.type, skill);
               } else if (choice.includes(i18n.__("SUGGESTION_CALL_IT_A_DAY"))) {
                 return this.sendJinaResponse(i18n.__("BYE"));
               } else {

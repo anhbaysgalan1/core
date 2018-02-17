@@ -16,6 +16,7 @@ const Thumbnail = styled.img`
   border-top-right-radius: .6rem;
  
   width: 100%;
+  min-height: 8rem;
 `;
 
 const Title = styled.span`
@@ -32,7 +33,7 @@ const Description = styled.span`
 `;
 
 const LinkBubble = ({ link, onLongPress, onClickStop }) => (
-  <BubbleWrapper sender={"me"} suggestion link>
+  <BubbleWrapper sender={"anorak"}>
     <ClickAndHold onEnd={onClickStop} onClickNHold={onLongPress} time={1}>
       <LinkWrapper href={"#"} onClick={() => window.open(link.link, "_system")}>
         <Bubble

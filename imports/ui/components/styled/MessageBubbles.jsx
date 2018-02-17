@@ -1,4 +1,14 @@
-import styled from "styled-components";
+import styled, { keyframes } from "styled-components";
+
+const fade = keyframes`
+  from {
+    opacity: 0;
+  }
+  
+  to {
+    opacity: 1;
+  }
+`;
 
 const flexJustify = (sender) => {
   if (sender === "me") {
@@ -17,6 +27,11 @@ export const BubbleWrapper = styled.div`
   justify-content: ${props => flexJustify(props.sender)};
 
   padding-bottom: 1rem;
+  
+  opacity: 0;
+  
+  animation: ${fade} 300ms ease;
+  animation-fill-mode: forwards;
 `;
 
 export const Bubble = styled.div`
@@ -30,7 +45,7 @@ export const Bubble = styled.div`
   
   ${props => props.suggestion && `cursor: pointer; `};
   
-  ${props => props.link && `max-width: 28vw;` };
+  ${props => props.link && `max-width: 51vw;` };
   
   &::before {
     content: "";
