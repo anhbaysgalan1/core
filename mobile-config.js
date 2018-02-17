@@ -6,6 +6,7 @@ App.info({
   author: 'Loan Laux',
   email: 'contact@loanlaux.fr',
   website: 'http://loanlaux.fr',
+  version: "1.1.0",
   buildNumber: '108009'
 });
 
@@ -41,15 +42,6 @@ App.icons({
 });
 
 App.launchScreens({
-  "iphone_2x": "resources/splashes/iphone_2x.png", // 640x490
-  "iphone5": "resources/splashes/iphone5.png", // 640x1136
-  "iphone6": "resources/splashes/iphone6.png", // 750x1334
-  "iphone6p_portrait": "resources/splashes/iphone6p_portrait.png", // 2208x1242
-  "iphone6p_landscape": "resources/splashes/iphone6p_landscape.png", // 2208x1242
-  "ipad_portrait": "resources/splashes/ipad_portrait.png", // 768x1024
-  "ipad_portrait_2x": "resources/splashes/ipad_portrait_2x.png", // 1536x2048
-  "ipad_landscape": "resources/splashes/ipad_landscape.png", // 1024x768
-  "ipad_landscape_2x": "resources/splashes/ipad_landscape_2x.png", // 2048x1536
   "android_mdpi_portrait": "resources/splashes/android_mdpi_portrait.png", // 320x480
   "android_mdpi_landscape": "resources/splashes/android_mdpi_landscape.png", // 480x320
   "android_hdpi_portrait": "resources/splashes/android_hdpi_portrait.png", // 480x800
@@ -62,3 +54,10 @@ App.launchScreens({
 
 App.accessRule('http://*');
 App.accessRule('https://*');
+
+App.appendToConfig(`
+  <splash src="../../../resources/splashes/Default@2x~universal~anyany.png" />
+  <splash src="../../../resources/splashes/Default@3x~universal~anyany.png" />
+`);
+
+App.setPreference('WebAppStartupTimeout', 50000);
