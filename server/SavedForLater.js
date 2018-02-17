@@ -1,16 +1,5 @@
 import { Meteor } from "meteor/meteor";
-import { Mongo } from "meteor/mongo";
-
-const formatContentIds = (contentIds) => contentIds.map((current, index, all) => {
-  // if (index !== all.length - 1) {
-  //   console.log("Adding a coma after", current);
-    // return (current + ",");
-  // }
-
-  return current;
-});
-
-export const SavedForLater = new Mongo.Collection("savedForLater");
+import { SavedForLater } from "/imports/api/SavedForLater";
 
 Meteor.publish("savedForLater", () => SavedForLater.find());
 
@@ -53,5 +42,9 @@ Meteor.methods({
     }
 
     // throw new Meteor.Error("user-not-signed-in", "You need to be signed in to get your saved content");
+  },
+
+  removeSavedForLaterContent(contentId) {
+    SavedForLater.remove({ user: Meteor.userId(), content: contentId });
   }
 });
