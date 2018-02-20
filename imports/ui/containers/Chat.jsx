@@ -184,7 +184,7 @@ class Chat extends Component {
             title: row.title,
             link: row.link,
             image: row.image || "http://via.placeholder.com/150x100",
-            description: row.description || "Lorem ipsum dolor sit amet..."
+            community: row.community || ""
           }));
 
           if (filteredContent.length < 1) {
