@@ -172,7 +172,7 @@ class Chat extends Component {
    */
 
   displayDiscover(type, skill) {
-    if (Meteor._localStorage.getItem("contentOverUntil") && Meteor._localStorage.getItem("contentOverUntil") > new Date().getTime()) {
+    if (Meteor._localStorage.getItem("contentOverUntil") && parseInt(Meteor._localStorage.getItem("contentOverUntil")) > new Date().getTime()) {
       this.sendJinaResponse(i18n.__("CONTENT_OVER"))
     } else {
         Meteor.callPromise("content/getRandomFromCategory", type, skill)
