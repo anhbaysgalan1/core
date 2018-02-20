@@ -6,8 +6,8 @@ App.info({
   author: 'Loan Laux',
   email: 'contact@loanlaux.fr',
   website: 'http://loanlaux.fr',
-  version: "1.2.0",
-  buildNumber: '111111'
+  version: "1.2.1",
+  buildNumber: '111120'
 });
 
 App.setPreference("StatusBarBackgroundColor", "#0f90d1");
