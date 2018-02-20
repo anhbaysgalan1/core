@@ -7,8 +7,6 @@ Meteor.methods({
 
     const connection = await mysql.createConnection(Meteor.settings.mysql);
 
-    console.log(`Getting 3 random items from category ${category}, with skill ${skill}`);
-
     const query = mysql.format(`
       SELECT *
       FROM cd_raw_intake 
@@ -17,15 +15,6 @@ Meteor.methods({
       ORDER BY RAND()
       LIMIT 3
     `, [category, `%${skill}%`]);
-
-    console.log("-- SQL Query:", query);
-
-    const analytics = new Analytics(Meteor.settings.segmentWriteKey);
-
-    analytics.track({
-      userId: "0000000",
-      event: "Show discover program"
-    });
 
     return await connection.query(query);
   },

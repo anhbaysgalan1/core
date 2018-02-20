@@ -22,23 +22,19 @@ Meteor.methods({
     const currentUserId = Meteor.userId();
 
     if (currentUserId) {
-      console.log("User is logged in:", currentUserId);
-
       const contentIds = SavedForLater
         .find({ user: currentUserId })
         .fetch()
         .map((current) => current.content);
 
-      console.log("Returning saved for later:", contentIds);
+      if (contentIds.length <= 0) {
+        return [];
+      }
 
       const query = `SELECT * FROM cd_raw_intake WHERE row_id IN (${contentIds})`;
-      console.log("Using query", query);
       const results = await connection.query(query);
 
-      console.log("Final content:", results);
-
       return results;
-
     }
 
     // throw new Meteor.Error("user-not-signed-in", "You need to be signed in to get your saved content");

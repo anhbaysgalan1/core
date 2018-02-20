@@ -7,15 +7,9 @@ Meteor.publish("users", () => Meteor.users.find({   }));
 
 Meteor.methods({
   "user/doesUserExist": (username) => {
-    console.log("user/doesUserExist");
-    console.log(Accounts.findUserByUsername(username));
-    console.log(typeof Accounts.findUserByUsername(username));
-
     return typeof Accounts.findUserByUsername(username) === "object";
   },
   "user/awardPoints": (materialType, categories) => {
-    console.log("Awarding points for", materialType);
-
     const currentXp = Meteor.user().profile.xp;
     const currentLevel = Meteor.user().profile.level;
     const currentTokens = Meteor.user().profile.tokens;
@@ -25,9 +19,6 @@ Meteor.methods({
 
     let currentSkillXp;
     let skillIndex;
-
-    console.log("Current XP =", currentXp);
-    console.log("Current tokens =", currentTokens);
 
     let addedXp = 0;
     let addedTokens = 0;
@@ -45,29 +36,18 @@ Meteor.methods({
     }
 
     for (const skill in skills) {
-      console.log("Checking skill", skills[skill]);
-      console.log("Looking for", categoriesAsArray);
-
       const skillSlug = Category.findOne({ slug: skills[skill].slug }).slug;
 
       if (categoriesAsArray.includes(skillSlug)) {
         currentSkillXp = skills[skill].xp;
 
         for (const category in categoriesAsArray) {
-          console.log(`Current XP on ${categoriesAsArray[category]}`, currentSkillXp);
-          console.log(`New XP on ${categoriesAsArray[category]}`, currentSkillXp + addedXp);
-
           skillIndex = skill;
         }
       }
     }
 
-    console.log("New XP =", currentXp + addedXp);
-    console.log("New tokens =", currentTokens + addedTokens);
-
     if (currentXp + addedXp > currentLevel * 1000) {
-      console.log("Upgrading level");
-
       addedLevel = true;
 
       Meteor.users.update(Meteor.userId(), {

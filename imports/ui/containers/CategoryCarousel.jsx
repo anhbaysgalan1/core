@@ -14,13 +14,9 @@ class CategoryCarouselContainer extends Component {
   }
 
   handleCategoryClick = (slug) => {
-    console.log("Clicked category", slug);
-
     let { checkedCategories } = this.state;
 
     if (checkedCategories.includes(slug)) {
-      console.log("Removing", slug);
-
       checkedCategories = checkedCategories.filter(currentSlug => currentSlug !== slug);
     } else if (checkedCategories.length < 6) {
       checkedCategories.push(slug);
@@ -32,8 +28,6 @@ class CategoryCarouselContainer extends Component {
       if (this.state.checkedCategories.length === 6) {
         this.props.onPickingOver(this.state.checkedCategories);
       }
-
-      console.log("State updated", this.state);
     })
   };
 
