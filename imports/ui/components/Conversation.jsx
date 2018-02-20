@@ -2,11 +2,11 @@ import React, { Component } from "react";
 import styled, { keyframes } from "styled-components";
 import i18n from "meteor/universe:i18n";
 
-import MessageBubble from "./MessageBubble";
 import LinkBubble from "./LinkBubble";
+
+import MessageBubble from "./MessageBubble";
 import MessageLinkBubble from "./MessageLinkBubble";
 import AvatarBubble from "./AvatarBubble";
-import InAppBrowser from "./InAppBrowser";
 import CategoryCarousel from "../containers/CategoryCarousel";
 
 const ellipsis = keyframes`
@@ -54,8 +54,6 @@ class Conversation extends Component {
   }
 
   autoScroll = () => {
-    console.log("Auto-scrolling");
-
     this.conversationWrapper.scrollTop = this.conversationWrapper.scrollHeight;
   }
 
@@ -77,21 +75,21 @@ class Conversation extends Component {
     )
   }
 
-  renderLink = (link) => (
-    <LinkBubble
-      link={link}
-      onLongPress={() => this.props.onLinkLongPress(link)}
-      onClickStop={(e, enough) => this.props.onLinkClickStop(enough, link)}
-    />
-  );
+  renderLink = (link) => {
+    return (
+      <LinkBubble
+        link={link}
+        onLongPress={() => this.props.onLinkLongPress(link)}
+        onClickStop={(e, enough) => this.props.onLinkClickStop(enough, link)}
+      />
+    );
+  }
 
   renderAvatar = (avatar, isBot = false) => (
     <AvatarBubble avatar={{ ...avatar, isBot }} onClick={this.props.onAvatarClicked} />
   );
 
   renderSuggestions = (suggestions) => suggestions.map(suggestion => {
-    console.log("renderSuggestions", suggestion);
-
     if (typeof suggestion === "object" && suggestion.type && suggestion.type === "image") {
       console.log("Suggestion is avatar", suggestion);
       return this.renderAvatar(suggestion, true);

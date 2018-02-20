@@ -1,11 +1,9 @@
 import { Meteor } from "meteor/meteor";
-import { Accounts } from "meteor/accounts-base";
 import i18n from "meteor/universe:i18n";
-import _ from "lodash";
+import { analytics } from "meteor/okgrow:analytics";
 
 import React, { Component } from "react";
 import { compose } from "react-komposer";
-import partOfDay from "humanized-part-of-day";
 
 import { Conversation, MessageBox, Header, LongPressMenu } from "../components";
 import { getCategoryBySlug } from "/imports/api/Category";
@@ -54,8 +52,6 @@ class Chat extends Component {
 
     for (const suggestionIndex in suggestions) {
       if (suggestions.hasOwnProperty(suggestionIndex)) {
-        console.log("awaitSuggestionChoice > iterating over", suggestions[suggestionIndex]);
-
         const delay = (suggestionIndex + 1) * 30;
 
         if (suggestions[suggestionIndex].image) {
@@ -99,6 +95,8 @@ class Chat extends Component {
   };
 
   greet(isFirstMessage = false) {
+    import partOfDay from "humanized-part-of-day";
+
     // Greet user
     this.sendJinaResponse(i18n.__(`JINA_WELCOME_${partOfDay.getCurrent()}`, { name: Meteor.user().username }))
       .then(() => {
@@ -118,23 +116,17 @@ class Chat extends Component {
   }
 
   getRandomSkill() {
+    import sample from "lodash/sample";
+
     const userSkills = Meteor.user().profile.skills;
 
-    const randomSkill = _.sample(userSkills).slug;
-
-    console.log("randomSkill", randomSkill);
-
-    console.log("latestDiscover", this.state.latestDiscover);
+    const randomSkill = sample(userSkills).slug;
 
     const skillTitle = getCategoryBySlug(randomSkill).title;
 
     if (this.state.latestDiscover && skillTitle === this.state.latestDiscover.skill) {
-      console.log("randomSkill matched latest one, so a new one was picked");
-
       return this.getRandomSkill();
     }
-
-    console.log("skill", skillTitle);
 
     return skillTitle;
   }
@@ -180,15 +172,11 @@ class Chat extends Component {
    */
 
   displayDiscover(type, skill) {
-    console.log(`displayDiscover(${type}, ${skill})`);
-
     if (Meteor._localStorage.getItem("contentOverUntil") && Meteor._localStorage.getItem("contentOverUntil") > new Date().getTime()) {
       this.sendJinaResponse(i18n.__("CONTENT_OVER"))
     } else {
         Meteor.callPromise("content/getRandomFromCategory", type, skill)
         .then((content) => {
-          console.log("content:", content);
-
           const filteredContent = content.map((row) => ({
             id: row.row_id,
             type: row.material_type,
@@ -219,8 +207,6 @@ class Chat extends Component {
           filteredContent.push(i18n.__("CONTINUE_DISCOVER_PROGRAM"));
           filteredContent.push(i18n.__("CHANGE_CATEGORY"));
           filteredContent.push(i18n.__("START_OVER"));
-
-          console.log("filtered content:", filteredContent);
 
           return this.awaitSuggestionChoice(filteredContent);
         });
@@ -261,15 +247,12 @@ class Chat extends Component {
           const currentDate = new Date();
           Meteor._localStorage.setItem("contentOverUntil", currentDate.getTime() + 4 * 3600 * 1000);
         }
-        console.log("--- Keep going! ---");
 
         if (typedMessage.includes(i18n.__("CONTINUE_DISCOVER_PROGRAM"))) {
           this.displayDiscover(this.state.latestDiscover.type, this.state.latestDiscover.skill);
         } else if (typedMessage.includes(i18n.__("CHANGE_CATEGORY"))) {
           this.displayDiscover(this.state.latestDiscover.type, this.getRandomSkill());
         } else if (typedMessage.includes(i18n.__("START_OVER"))) {
-          console.log("Start over");
-
           this.setState({ latestDiscover: null });
 
           this.showBriefing();
@@ -281,7 +264,6 @@ class Chat extends Component {
       (registering && userName.length > 0 && email.length > 0 && gender.length > 0);
 
     if (userIsTypingPassword) {
-      console.log("User is typing password");
       // If user has typed a pasword, replace characters by dots before pushing it to conversation
 
       typedMessage = Array.prototype.map.call(typedMessage, () => "●");
@@ -290,28 +272,19 @@ class Chat extends Component {
     // Push message to conversation
     conversation.push({ sender: "me", text: typedMessage });
 
-    console.log("Handling sent message");
-
     if (onReply) {
-      console.log("Got onReply", onReply);
       this.setState({ typedMessage: "" });
 
       return onReply(typedMessage);
     }
 
     if (onSuggestionChoice) {
-      console.log("Got onSuggestionChoice", onSuggestionChoice);
-      console.log("Suggestions", this.state.suggestions);
-
       if (this.state.latestDiscover) {
         if (typedMessage.includes(i18n.__("VIDEO"))) {
-          console.log("--- GOT VIDEO BITCHEEEEES");
           this.displayDiscover("video", this.state.latestDiscover.skill);
         } else if (typedMessage.includes(i18n.__("ARTICLE"))) {
-          console.log("--- GOT ARTICLE BITCHEEEEES");
           this.displayDiscover("article", this.state.latestDiscover.skill);
         } else if (typedMessage.includes(i18n.__("COURSE"))) {
-          console.log("--- GOT COURSE BITCHEEEEES");
           this.displayDiscover("classes", this.state.latestDiscover.skill);
         }
       }
@@ -322,7 +295,6 @@ class Chat extends Component {
     }
 
     if (!userIsTypingPassword && typedMessage && typedMessage.toLowerCase().includes(i18n.__("STUDENT"))) {
-      console.log("Login phase.");
       this.startLoginScript();
     } else if (!userIsTypingPassword && typedMessage && typedMessage.toLowerCase().includes(i18n.__("NEWCOMER"))) {
       this.startSignUpScript();
@@ -335,66 +307,43 @@ class Chat extends Component {
           this.sendJinaResponse(i18n.__("JINA_ERROR_SOMETHING_WENT_WRONG", { err }))
             .then(() => this.sendJinaResponse(i18n.__("JINA_ERROR_PASSWORD_TRY_AGAIN")));
         } else {
+          if (Meteor.isProduction) {
+            analytics.identify(Meteor.userId(), {
+              email: Meteor.user().emails[0].address,
+              name: Meteor.user().username
+            });
+          }
+
           this.greet();
         }
       });
     }
     // If user is registering and has typed password, attempt to register
     else if (registering && userIsTypingPassword) {
+      import { Accounts } from "meteor/accounts-base";
+
       Accounts.createUser({
         username: userName,
         email: email,
         password: this.state.typedMessage, // State reference to typedMessage because local one is obfuscated
         profile: {
-          willHaveToChooseCategories: true,
           avatar: this.state.avatar,
           level: 1,
           xp: 0,
-          tokens: 0,
-          // skills: [
-          //   {
-          //     "slug": "astronomy",
-          //     "xp": 0,
-          //     "xpMax": 10000,
-          //     "rank": "First class"
-          //   },
-          //   {
-          //     "slug": "curiosity",
-          //     "xp": 0,
-          //     "xpMax": 10000,
-          //     "rank": "First class"
-          //   },
-          //   {
-          //     "slug": "chemistry",
-          //     "xp": 0,
-          //     "xpMax": 10000,
-          //     "rank": "First class"
-          //   },
-          //   {
-          //     "slug": "startup",
-          //     "xp": 0,
-          //     "xpMax": 10000,
-          //     "rank": "First class"
-          //   },
-          //   {
-          //     "slug": "philosophy",
-          //     "xp": 0,
-          //     "xpMax": 10000,
-          //     "rank": "First class"
-          //   },
-          //   {
-          //     "slug": "tech",
-          //     "xp": 0,
-          //     "xpMax": 10000,
-          //     "rank": "First class"
-          //   }
-          // ]
+          tokens: 0
         }
       }, (err) => {
         if (err) {
           this.sendJinaResponse(i18n.__("JINA_ERROR_SOMETHING_WENT_WRONG", { err }));
         } else {
           // Greet new user
+
+          if (Meteor.isProduction) {
+            analytics.identify(Meteor.userId(), {
+              email: Meteor.user().emails[0].address,
+              name: Meteor.user().username
+            });
+          }
 
           this.sendJinaResponse(i18n.__("ANORAK_REGISTRATION_CATEGORY_PICK"))
             .then(() => this.setState({ showCategoryPicker: true }));
@@ -518,8 +467,6 @@ class Chat extends Component {
         delay = delay + options.extraDelay;
       }
 
-      console.log("Delay ", delay);
-
       setTimeout(() => {
         if (options.link) {
           conversation.push({ sender: "jina", text: message, link: options.link });
@@ -576,8 +523,6 @@ class Chat extends Component {
               .then((choice) => {
                 this.setState({ onReply: null, onSuggestionChoice: null });
 
-                console.log("Got choice", choice);
-
                 if (parseInt(choice) <= 13) {
                   this.sendJinaResponse(i18n.__("ANORAK_REGISTRATION_TOO_YOUNG"));
                 } else {
@@ -607,8 +552,6 @@ class Chat extends Component {
   }
 
   handleAvatarClicked(event, url) {
-    console.log("Clicked avatar with url:", url);
-
     if (url !== "/avatar_win.png") {
       this.setState({
         avatar: url,
@@ -627,8 +570,6 @@ class Chat extends Component {
       isLongPressMenuOpen: true,
       longPressedLink: link
     });
-
-    console.log("handleLinkLongPress for link", link);
   }
 
   handleLinkClickStop = (enough, link) => {
@@ -637,8 +578,6 @@ class Chat extends Component {
         linkClickCounter: this.state.linkClickCounter + 1 // For some reason, the click event is fired twice. Here we wait for the second one.
       }, () => {
         if (this.state.linkClickCounter >= 2) {
-          console.log("::: Clicked on link", link);
-
           this.sendJinaResponse(i18n.__("ANORAK_DID_YOU_FINISH"))
             .then(() => this.awaitSuggestionChoice([i18n.__("SUGGESTION_YES"), i18n.__("SUGGESTION_NO")]))
             .then(async (finished) => {
@@ -713,8 +652,6 @@ class Chat extends Component {
   }
 
   handleSaveForLater = () => {
-    console.log("handleSaveForLater for link id", this.state.longPressedLink.id);
-
     Meteor.call("content/saveForLater", this.state.longPressedLink.id, (error, result) => {
       if (error) {
         this.sendJinaResponse(error);
@@ -728,8 +665,6 @@ class Chat extends Component {
   };
 
   handleReport = () => {
-    console.log("handleReport for link id", this.state.longPressedLink.id);
-
     Meteor.call("content/report", this.state.longPressedLink.link);
 
     this.setState({
@@ -766,7 +701,7 @@ class Chat extends Component {
         isRecordingPassword={userIsTypingPassword}
         onSend={this.handleMessageSend}
         onChange={this.handleMessageChange}
-        setMessageInputRef={(node) => { console.log("Setting messageInput ref", node); this.messageInput = node }}
+        setMessageInputRef={(node) => { this.messageInput = node }}
       />
     ];
   }
@@ -790,8 +725,6 @@ function getTrackerLoader(reactiveMapper) {
 }
 
 function dataLoader(props, onData) {
-  console.log("--- Chat dataLoader with props ---", props);
-
   if (Meteor.subscribe("users").ready() && Meteor.subscribe("categories").ready()) {
     onData(null, {
       user: Meteor.user()

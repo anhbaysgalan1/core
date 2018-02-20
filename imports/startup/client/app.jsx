@@ -6,9 +6,11 @@ import ReactDOM from 'react-dom';
 import MainLayout from '../../ui/containers/MainLayout.jsx';
 
 Meteor.startup(() => {
-  navigator.serviceWorker.register('/sw.js')
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register('/sw.js')
     .then()
     .catch(error => console.log('ServiceWorker registration failed: ', error));
+  }
 
   window.oncontextmenu = function(event) {
     event.preventDefault();

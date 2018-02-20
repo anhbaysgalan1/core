@@ -14,5 +14,12 @@
     "minInterval": 200,
     "database": "undermind_core"
   },
-  "segmentWriteKey": "7PXhNvKLVrmtCivWKoldzvcvjCnp1s2E"
+  "public": {
+    "analyticsSettings": {
+      "Mixpanel": {
+        "token": "8d573875f1792a6e1111e32e896e8815",
+        "people": true
+      }
+    }
+  }
 }

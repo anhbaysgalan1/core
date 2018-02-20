@@ -7,7 +7,5 @@ export function getAllCategories() {
 }
 
 export function getCategoryBySlug(slug) {
-  console.log("Finding category", slug);
-
   return Categories.findOne({ slug: slug });
 }
