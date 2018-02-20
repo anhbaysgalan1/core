@@ -47,11 +47,9 @@ const LinkBubble = ({ link, onLongPress, onClickStop }) => (
               {link.title}
             </Truncate>
           </Title>
-          {/*<Description>*/}
-            {/*<Truncate lines={2} ellipsis={<span>...</span>}>*/}
-              {/*{link.description}*/}
-            {/*</Truncate>*/}
-          {/*</Description>*/}
+          <Description>
+            {link.community}
+          </Description>
         </Bubble>
       </LinkWrapper>
     </ClickAndHold>
