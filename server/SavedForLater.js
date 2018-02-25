@@ -34,6 +34,8 @@ Meteor.methods({
       const query = `SELECT * FROM cd_raw_intake WHERE row_id IN (${contentIds})`;
       const results = await connection.query(query);
 
+      connection.end();
+
       return results;
     }
 
