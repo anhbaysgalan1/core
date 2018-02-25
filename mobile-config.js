@@ -61,3 +61,6 @@ App.appendToConfig(`
 `);
 
 App.setPreference('WebAppStartupTimeout', 50000);
+
+App.setPreference("AutoHideSplashScreen", true, "ios");
+App.setPreference("SplashScreenDelay", "10", "ios"); //5 seconds delay 
