@@ -6,8 +6,8 @@ App.info({
   author: 'Loan Laux',
   email: 'contact@loanlaux.fr',
   website: 'http://loanlaux.fr',
-  version: "1.2.1",
-  buildNumber: '111120'
+  version: "1.2.2",
+  buildNumber: '111130'
 });
 
 App.setPreference("StatusBarBackgroundColor", "#0f90d1");
@@ -63,4 +63,4 @@ App.appendToConfig(`
 App.setPreference('WebAppStartupTimeout', 50000);
 
 App.setPreference("AutoHideSplashScreen", true, "ios");
-App.setPreference("SplashScreenDelay", "10", "ios"); //5 seconds delay 
+App.setPreference("SplashScreenDelay", "10", "ios"); //5 seconds delay
