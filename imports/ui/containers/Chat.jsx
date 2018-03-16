@@ -73,7 +73,7 @@ class Chat extends Component {
     });
   });
 
-  awaitReply = (suggestions) => new Promise((resolve, reject) => {
+  awaitReply = () => new Promise((resolve, reject) => {
     this.setState({
       onReply: resolve // Passing the resolve reference
     }, () => {
@@ -172,7 +172,8 @@ class Chat extends Component {
    */
 
   displayDiscover(type, skill) {
-    if (Meteor._localStorage.getItem("contentOverUntil") && parseInt(Meteor._localStorage.getItem("contentOverUntil")) > new Date().getTime()) {
+    if (Meteor._localStorage.getItem("contentOverUntil") &&
+      parseInt(Meteor._localStorage.getItem("contentOverUntil")) > new Date().getTime()) {
       this.sendJinaResponse(i18n.__("CONTENT_OVER"))
     } else {
         Meteor.callPromise("content/getRandomFromCategory", type, skill)
@@ -201,7 +202,9 @@ class Chat extends Component {
 
             const entities = new AllHtmlEntities();
 
-            this.sendJinaResponse(i18n.__("BEFORE_SHOWING_CONTENT", { skill: entities.decode(skill) }), { noDelay: true });
+            this.sendJinaResponse(i18n.__("BEFORE_SHOWING_CONTENT", {
+              skill: entities.decode(skill)
+            }), { noDelay: true });
           }
 
           filteredContent.push(i18n.__("CONTINUE_DISCOVER_PROGRAM"));
@@ -212,6 +215,50 @@ class Chat extends Component {
         });
     }
   }
+
+  registerUsernameIfNotTaken = (userName) => new Promise((resolve, reject) => {
+    console.log("registerUsernameIfNotTaken");
+
+    this.setState({
+      registering: true,
+      userName
+    });
+
+    Meteor.call("user/doesUserExist", userName, (error, result) => {
+      if (!error && result) {
+        console.log("registerUsernameIfNotTaken reject");
+
+        reject();
+      } else {
+        console.log("registerUsernameIfNotTaken resolve");
+
+        resolve();
+      }
+    });
+  });
+
+  pickUsername = (isRetry = false) => new Promise((resolve, reject) => {
+    this.sendJinaResponse(i18n.__(isRetry ? "ANORAK_REGISTRATION_USERNAME_TAKEN" : "ANORAK_REGISTRATION_PICK_USERNAME", {
+      userName: this.state.lastMessage
+    }))
+      .then(this.awaitReply)
+      .then(() => this.registerUsernameIfNotTaken(this.state.lastMessage))
+      .then(() => {
+        // Username is available
+
+        this.sendJinaResponse(i18n.__("ANORAK_REGISTRATION_AGREE_TOC", {
+          userName: this.state.lastMessage
+        }), {
+          link: "https://undermind.typeform.com/to/BJumJz"
+        });
+
+        resolve();
+      }, () => {
+        // Username is taken
+
+        this.pickUsername(true);
+      })
+  });
 
   /**
    * Push typed message into the `conversation` state array, and perform additional operations if needed
@@ -235,7 +282,10 @@ class Chat extends Component {
 
     let typedMessage = this.state.typedMessage;
 
-    this.setState({ suggestions: [] });
+    this.setState({
+      suggestions: [],
+      lastMessage: typedMessage
+    });
 
     if (typedMessage.includes(i18n.__("CONTINUE_DISCOVER_PROGRAM")) ||
       typedMessage.includes(i18n.__("CHANGE_CATEGORY")) ||
@@ -273,6 +323,8 @@ class Chat extends Component {
     conversation.push({ sender: "me", text: typedMessage });
 
     if (onReply) {
+      console.log("Responding to awaitReply");
+
       this.setState({ typedMessage: "" });
 
       return onReply(typedMessage);
@@ -373,7 +425,10 @@ class Chat extends Component {
       this.setState({ email: typedMessage });
 
       this.sendJinaResponse(i18n.__("ANORAK_REGISTRATION_PICK_GENDER"))
-        .then(() => this.awaitSuggestionChoice([i18n.__("SUGGESTION_GENDER_MALE"), i18n.__("SUGGESTION_GENDER_FEMALE")]))
+        .then(() => this.awaitSuggestionChoice([
+          i18n.__("SUGGESTION_GENDER_MALE"),
+          i18n.__("SUGGESTION_GENDER_FEMALE")
+        ]))
         .then((gender) => {
           this.setState({ gender });
 
@@ -381,25 +436,6 @@ class Chat extends Component {
 
           this.displayAvatars();
         });
-    }
-    // If user is registering
-    else if (this.state.registering) {
-      this.setState({ userName: typedMessage });
-
-      Meteor.call("user/doesUserExist", typedMessage, (error, result) => {
-        if (!error && result) {
-          this.setState({ userName: typedMessage }, () => {
-            this.sendJinaResponse(i18n.__("ANORAK_REGISTRATION_USERNAME_TAKEN"), { userName: typedMessage });
-          });
-        } else {
-          this.sendJinaResponse(i18n.__("ANORAK_REGISTRATION_AGREE_TOC", { userName: typedMessage }), { link: "https://undermind.typeform.com/to/BJumJz" })
-            .then(() => this.awaitSuggestionChoice([i18n.__("SUGGESTION_AGREE"), i18n.__("SUGGESTION_DISAGREE")]))
-            .then(() => {
-              this.setState({ onSuggestionChoice: null });
-              this.sendJinaResponse(i18n.__("ANORAK_REGISTRATION_PICK_EMAIL", { userName: typedMessage }))
-            });
-        }
-      });
     }
     // If user asks for privacy policy
     else if (this.state.privacyPolicyCapture && typedMessage.includes(i18n.__("SUGGESTION_REGISTRATION_PRIVACY_NO"))) {
@@ -515,24 +551,31 @@ class Chat extends Component {
     } else {
       this.sendJinaResponse(i18n.__("JINA_REGISTRATION_GREETING"))
         .then(() => this.sendJinaResponse(i18n.__("JINA_REGISTRATION_GREETING_2")))
-        .then(() => this.awaitSuggestionChoice([i18n.__("SUGGESTION_REGISTRATION_PRIVACY_YES"), i18n.__("SUGGESTION_REGISTRATION_PRIVACY_NO")]))
+        .then(() => this.awaitSuggestionChoice([
+          i18n.__("SUGGESTION_REGISTRATION_PRIVACY_YES"),
+          i18n.__("SUGGESTION_REGISTRATION_PRIVACY_NO")
+        ]))
         .then((choice) => {
           if (choice.includes(i18n.__("SUGGESTION_REGISTRATION_PRIVACY_YES"))) {
-            this.sendJinaResponse(i18n.__("ANORAK_REGISTRATION_AGE_CHECK"))
-              .then(() => this.awaitReply())
-              .then((choice) => {
-                this.setState({ onReply: null, onSuggestionChoice: null });
+            this.pickUsername()
+              .then(() => this.awaitSuggestionChoice([i18n.__("SUGGESTION_AGREE"), i18n.__("SUGGESTION_DISAGREE")]))
+              .then(() => {
+                this.setState({ onSuggestionChoice: null });
+                this.sendJinaResponse(i18n.__("ANORAK_REGISTRATION_PICK_EMAIL", { userName: this.state.lastMessage }))
+              })
 
-                if (parseInt(choice) <= 13) {
-                  this.sendJinaResponse(i18n.__("ANORAK_REGISTRATION_TOO_YOUNG"));
-                } else {
-                  this.sendJinaResponse(i18n.__("ANORAK_REGISTRATION_AGE_OK"))
-                    .then(() => {
-                      this.sendJinaResponse(i18n.__("ANORAK_REGISTRATION_PICK_USERNAME"));
-                      this.setState({ registering: true, onReply: null });
-                    });
-                }
-              });
+
+            // this.sendJinaResponse(i18n.__("ANORAK_REGISTRATION_AGE_CHECK"))
+            //   .then(() => this.awaitReply())
+            //   .then((choice) => {
+            //     this.setState({ onReply: null, onSuggestionChoice: null });
+            //
+            //     if (parseInt(choice) <= 13) {
+            //       this.sendJinaResponse(i18n.__("ANORAK_REGISTRATION_TOO_YOUNG"));
+            //     } else {
+            //       this.sendJinaResponse(i18n.__("ANORAK_REGISTRATION_AGE_OK"));
+            //     }
+            //   });
           }
         });
     }
@@ -561,7 +604,9 @@ class Chat extends Component {
           ...this.state.conversation,
           { type: "image", url }
         ]
-      }, () => this.sendJinaResponse(i18n.__("UNDERMIND_REGISTRATION_PASSWORD_PROMPT", { userName: this.state.userName })));
+      }, () => this.sendJinaResponse(i18n.__("UNDERMIND_REGISTRATION_PASSWORD_PROMPT", {
+        userName: this.state.userName
+      })));
     }
   }
 
@@ -574,8 +619,9 @@ class Chat extends Component {
 
   handleLinkClickStop = (enough, link) => {
     if (!enough) {
+      // For some reason, the click event is fired twice. Here we wait for the second one.
       this.setState({
-        linkClickCounter: this.state.linkClickCounter + 1 // For some reason, the click event is fired twice. Here we wait for the second one.
+        linkClickCounter: this.state.linkClickCounter + 1
       }, () => {
         if (this.state.linkClickCounter >= 2) {
           this.sendJinaResponse(i18n.__("ANORAK_DID_YOU_FINISH"))
@@ -675,7 +721,10 @@ class Chat extends Component {
 
   render() {
     const userIsTypingPassword = (this.state.authenticating && this.state.userName.length > 0) ||
-      (this.state.registering && this.state.userName.length > 0 && this.state.email.length > 0 && this.state.gender.length > 0);
+      (this.state.registering &&
+      this.state.userName.length > 0 &&
+      this.state.email.length > 0 &&
+      this.state.gender.length > 0);
 
     return [
       <Header {...this.props} />,
