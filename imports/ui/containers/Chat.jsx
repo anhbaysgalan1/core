@@ -102,21 +102,19 @@ class Chat extends Component {
     onAvatarClick: resolve
   });
 
-  greet(isFirstMessage = false) {
-    import partOfDay from "humanized-part-of-day";
+  greet = async (isFirstMessage = false) => {
+    const partOfDay = await import("humanized-part-of-day");
 
     // Greet user
     this.sendJinaResponse(i18n.__(`JINA_WELCOME_${partOfDay.getCurrent()}`, { name: Meteor.user().username }))
       .then(() => {
         if (isFirstMessage) {
-          // Should connect to JinaCore here
           this.showBriefing();
         } else {
           // End authentication phase
           this.setState({
             authenticating: false
           }, () => {
-            // Should connect to JinaCore here
             this.showBriefing();
           });
         }
@@ -569,40 +567,8 @@ class Chat extends Component {
       this.startSignUpScript();
     }
 
-    // If user is authenticating and has typed password, attempt to log in
-    if (authenticating && isRecordingPassword) {
-      Meteor.loginWithPassword(userName, this.state.typedMessage, (err) => {
-        if (err) {
-          this.sendJinaResponse(i18n.__("JINA_ERROR_SOMETHING_WENT_WRONG", { err }))
-            .then(() => this.sendJinaResponse(i18n.__("JINA_ERROR_PASSWORD_TRY_AGAIN")));
-        } else {
-          if (Meteor.isProduction) {
-            analytics.identify(Meteor.userId(), {
-              email: Meteor.user().emails[0].address,
-              name: Meteor.user().username
-            });
-          }
-
-          this.greet();
-        }
-      });
-    }
-    // If user has typed username but hasn't typed password yet
-    else if (this.state.authenticating) {
-      // Check if username is correct
-
-      Meteor.call("user/doesUserExist", typedMessage, (error, result) => {
-        if (!error && result) {
-          this.setState({ userName: typedMessage }, () => {
-            this.sendJinaResponse(i18n.__("JINA_LOGIN_PASSWORD_PROMPT", { userName: this.state.userName }));
-          });
-        } else {
-          this.sendJinaResponse(i18n.__("JINA_ERROR_USER_NOT_FOUND", { userName: typedMessage }));
-        }
-      });
-    }
     // If user asks for privacy policy
-    else if (this.state.privacyPolicyCapture && typedMessage.includes(i18n.__("SUGGESTION_REGISTRATION_PRIVACY_NO"))) {
+    if (this.state.privacyPolicyCapture && typedMessage.includes(i18n.__("SUGGESTION_REGISTRATION_PRIVACY_NO"))) {
       this.sendJinaResponse(i18n.__("JINA_REGISTRATION_PRIVACY_POLICY"))
         .then(() => this.sendJinaResponse(i18n.__("JINA_REGISTRATION_PRIVACY_POLICY_COME_BACK")))
         .then(() => this.setState({
@@ -686,21 +652,102 @@ class Chat extends Component {
     }, options.noDelay ? 0 : delay);
   });
 
+  getUsername = (oldResolve = null) => new Promise((resolve, reject) => {
+    let message = "JINA_LOGIN_USERNAME_PROMPT";
+
+    if (oldResolve) {
+      message = "JINA_ERROR_USER_NOT_FOUND";
+    }
+
+    this.sendJinaResponse(i18n.__(message))
+      .then(this.awaitReply)
+      .then((username) => {
+        this.setState({ onReply: null });
+
+        console.log("username", username);
+
+        Meteor.call("user/doesUserExist", username, (error, result) => {
+          if (!error && result) {
+            // If username exists, store it in state and resolve promise
+
+            console.log("username in Meteor.call", username);
+
+            this.setState({ userName: username }, () => {
+              if (oldResolve) {
+                oldResolve();
+              } else {
+                resolve();
+              }
+            });
+          } else {
+            // If username doesn't exist, try again
+
+            this.getUsername(oldResolve ? oldResolve : resolve);
+          }
+        });
+      });
+  });
+
+  getPassword = (oldResolve = null) => new Promise(async (resolve, reject) => {
+    this.setState({ badPasswordAttempts: 0 });
+
+    let message = "JINA_LOGIN_PASSWORD_PROMPT";
+
+    if (oldResolve) {
+      this.setState({ badPasswordAttempts: this.state.badPasswordAttempts + 1 });
+
+      message = "JINA_ERROR_PASSWORD_TRY_AGAIN";
+    }
+
+    if (this.state.badPasswordAttempts >= 3) {
+      this.sendJinaResponse(i18n.__("JINA_ERROR_PASSWORD_FORGOTTEN"));
+
+      const { Accounts } = await import("meteor/accounts-base");
+
+      Meteor.sendResetPasswordEmail(Accounts.findUserByUsername(this.state.userName));
+    } else {
+      this.sendJinaResponse(i18n.__(message, { userName: this.state.userName }))
+        .then(() => this.setState({ isRecordingPassword: true }))
+        .then(this.awaitReply)
+        .then(() => {
+          const { password } = this.state;
+
+          this.setState({ onReply: null });
+
+          console.log("password", password);
+
+          Meteor.loginWithPassword(this.state.userName, password, (err) => {
+            if (err) {
+              this.sendJinaResponse(i18n.__("JINA_ERROR_SOMETHING_WENT_WRONG", { err }))
+                .then(() => this.getPassword(oldResolve ? oldResolve : resolve));
+            } else {
+              if (Meteor.isProduction) {
+                analytics.identify(Meteor.userId(), {
+                  email: Meteor.user().emails[0].address,
+                  name: Meteor.user().username
+                });
+              }
+
+              if (oldResolve) {
+                oldResolve();
+              } else {
+                resolve();
+              }
+            }
+          });
+        });
+
+    }
+  });
+
   /**
    * Start login phase
    */
 
   startLoginScript() {
-    this.sendJinaResponse(i18n.__("JINA_LOGIN_USERNAME_PROMPT"))
-      .then(() => {
-        this.messageInput.focus();
-
-        // Set `authenticating` state bool value to true and empty suggestions
-        this.setState({
-          authenticating: true,
-          suggestions: []
-        });
-      });
+    this.getUsername()
+      .then(this.getPassword)
+      .then(this.greet);
   }
 
   /**

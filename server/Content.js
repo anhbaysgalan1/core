@@ -2,8 +2,8 @@ import { Meteor } from "meteor/meteor";
 
 Meteor.methods({
   "content/getRandomFromCategory": async (category, skill) => {
-    import mysql from "promise-mysql";
-    import Analytics from "analytics-node";
+    const mysql = await import("promise-mysql");
+    const Analytics = await import("analytics-node");
 
     const connection = await mysql.createConnection(Meteor.settings.mysql);
 
@@ -16,7 +16,11 @@ Meteor.methods({
       LIMIT 3
     `, [category, `%${skill}%`]);
 
-    return await connection.query(query);
+    const results = await connection.query(query);
+
+    connection.end();
+
+    return results;
   },
 
   "content/report": (link) => {
