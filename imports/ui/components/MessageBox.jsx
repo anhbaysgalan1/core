@@ -3,8 +3,6 @@ import PropTypes from "prop-types";
 import styled from "styled-components";
 import i18n from "meteor/universe:i18n";
 
-import Suggestions from "./MessageSuggestions";
-
 const MessageBoxAndSuggestions = styled.div`
   position: fixed;
   bottom: 0;
@@ -43,8 +41,8 @@ const RoundButton = styled.a`
   border: none;
   border-radius: 50%;
   
-  width: 1.5rem;
-  height: 1.5rem;
+  width: 36px;
+  height: 36px;
   
   ${props => props.right && `position: absolute;`}
   ${props => props.right ? `right` : `left`}: .9rem;
@@ -97,7 +95,9 @@ const MoreMenu = styled.nav`
   
   a {
     opacity: ${props => props.isOpen ? `1` : `0`};
-    display: ${props => props.isOpen ? `block` : `none`};
+    display: ${props => props.isOpen ? `flex` : `none`};
+    align-items: center;
+    justify-content: center;
     
     transition-property: all;
     transition-duration: 300ms;
@@ -105,12 +105,12 @@ const MoreMenu = styled.nav`
     
     margin: .3rem 0;
     
-    background: transparent;
+    background: #0F90D1;
+    
+    img {
+      height: 52%;
+    }
   }
-  
-  //&.visible button {
-  //  opacity: 1;
-  //}
   
   ${Array(10).join(0).split(0).reverse().map((item, index) => `
     button:nth-child(${index}) {
@@ -147,10 +147,6 @@ class MessageBox extends Component {
   render() {
     return (
       <MessageBoxAndSuggestions>
-        {/*<Suggestions*/}
-          {/*suggestions={this.props.suggestions}*/}
-          {/*onSuggestionClicked={this.props.onSuggestionClicked}*/}
-        {/*/>*/}
         <MoreMenu isOpen={this.state.isMoreMenuOpen}>
           <RoundButton
             href={"#"}
@@ -170,15 +166,6 @@ class MessageBox extends Component {
           >
             <img src={`/bug.png`} />
           </RoundButton>
-          {/*<RoundButton onClick={this.toggleMoreMenu}>*/}
-            {/*<img src={`/settings.png`} />*/}
-          {/*</RoundButton>*/}
-          <RoundButton onClick={() => this.props.history.push("/savedForLater")}>
-            <img src={`/saveforlater.png`} />
-          </RoundButton>
-          {/*<RoundButton onClick={this.toggleMoreMenu}>*/}
-            {/*<img src={`/notifications.png`} />*/}
-          {/*</RoundButton>*/}
         </MoreMenu>
         <MessageBoxWrapper innerRef={node => this.form = node} onSubmit={this.props.onSend}>
           <RoundButton

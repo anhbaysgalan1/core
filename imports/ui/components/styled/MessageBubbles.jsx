@@ -36,7 +36,9 @@ export const BubbleWrapper = styled.div`
 
 export const Bubble = styled.div`
   background: ${props => props.sender === "me" ? "#0F90D1" : "#D8D8D8"};
+  color: ${props => props.sender === "me" ? "white" : "black"};
   ${props => props.suggestion && `background: #0F90D1;`}
+  ${props => props.suggestion && `color: white;`}
       
   border-radius: .6rem .6rem ${props => props.sender === "me" ? "0" : ".6rem"} ${props => props.sender === "me" ? ".6rem" : "0"};
   

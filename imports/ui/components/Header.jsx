@@ -37,7 +37,13 @@ class Header extends Component {
   render() {
     const { location } = this.props;
 
-    const currentPane = location.pathname === "/profile" ? "profile" : "chat";
+    let currentPane = "chat";
+
+    if (location.pathname === "/profile") {
+      currentPane = "profile";
+    } else if (location.pathname === "/savedForLater") {
+      currentPane = "saved";
+    }
 
     return (
       <HeaderWrapper>
@@ -50,6 +56,10 @@ class Header extends Component {
           <Icon
             src={`/user${currentPane === "profile" ? `_active` : ``}.png`}
             onClick={event => this.props.history.push("/profile")}
+          />
+          <Icon
+            src={`/saveforlater${currentPane === "saved" ? `_active` : ``}.png`}
+            onClick={() => this.props.history.push("/savedForLater")}
           />
         </Switch>
       </HeaderWrapper>

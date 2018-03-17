@@ -66,7 +66,7 @@ const BackButton = styled.button`
   
   position: absolute;
   left: 1rem;
-  top: -31px;
+  top: -52px;
   
   z-index: 10;
   
@@ -89,11 +89,15 @@ const Wrapper = styled.div`
   padding-top: 6rem;
 `;
 
+const NavigationTitle = styled.h2`
+  margin: 0;
+`;
+
 const SavedForLater = ({ content, history, onDelete }) => (
   <Wrapper>
     <NavigationRow>
       <BackButton onClick={() => history.push("/")}><i className={"fa fa-chevron-left"} /></BackButton>
-      <h2>Saved courses</h2>
+      <NavigationTitle>Saved courses</NavigationTitle>
     </NavigationRow>
     {content.map((currentContent, index) => (
       <ContentRow key={index}>
