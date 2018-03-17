@@ -25,8 +25,8 @@ const Button = styled.button`
 
 const MessageSuggestions = ({ suggestions, onSuggestionClicked }) => (
   <SuggestionWrapper>
-    {suggestions.map((suggestion) => (
-      <Button onClick={() => onSuggestionClicked(suggestion)}>{suggestion}</Button>
+    {suggestions.map((suggestion, index) => (
+      <Button key={`suggestion-${index}`} onClick={() => onSuggestionClicked(suggestion)}>{suggestion}</Button>
     ))}
   </SuggestionWrapper>
 );

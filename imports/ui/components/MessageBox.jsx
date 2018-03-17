@@ -189,7 +189,10 @@ class MessageBox extends Component {
           </RoundButton>
           <MessageInput
             type={this.props.isRecordingPassword ? `password` : `text`}
-            placeholder={i18n.__("MESSAGE_BOX_PLACEHOLDER")}
+            placeholder={i18n.__(this.props.isRecordingPassword
+              ? "MESSAGE_BOX_PASSWORD_PLACEHOLDER"
+              : "MESSAGE_BOX_PLACEHOLDER")
+            }
             value={this.props.message}
             onChange={this.props.onChange}
             innerRef={node => this.props.setMessageInputRef(node)}
