@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React from "react";
 import Slider from "react-slick";
 import styled from "styled-components";
 
@@ -57,11 +57,39 @@ const CategoryTitle = styled.span`
   height: 2.5rem;
 `;
 
+const arrowStyle = {
+  color: "#0F90D1",
+  display: "block",
+  position: "absolute",
+  top: "35%",
+  fontSize: "2rem",
+  zIndex: 9999
+};
+
+const PrevArrow = ({onClick}) => (
+  <i
+    className="fa fa-chevron-left"
+    style={{...arrowStyle, left: 0}}
+    onClick={onClick}
+  />
+);
+
+const NextArrow = ({onClick}) => (
+  <i
+    className="fa fa-chevron-right"
+    style={{...arrowStyle, right: 0}}
+    onClick={onClick}
+  />
+);
+
 const CategoryCarousel = ({ categories, checkedCategories, onCategoryClick }) => {
   const settings = {
     dots: false,
     slidesToShow: 3,
-    swipeToSlide: true
+    swipeToSlide: true,
+    arrows: true,
+    prevArrow: <PrevArrow />,
+    nextArrow: <NextArrow />
   };
 
   console.log("checkedCategories", checkedCategories);
