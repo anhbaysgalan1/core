@@ -712,7 +712,7 @@ class Chat extends Component {
         .then(() => {
           const { password } = this.state;
 
-          this.setState({ onReply: null });
+          this.setState({ onReply: null, isRecordingPassword: false });
 
           console.log("password", password);
 
