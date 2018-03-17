@@ -21,9 +21,9 @@ const ConversationWrapper = styled.section`
   left: 0;
   right: 0;
 
-  max-height: 88vh;
+  max-height: 92vh;
   
-  padding: 1rem .8rem 4rem .8rem;
+  padding: 7rem .8rem 0rem .8rem;
   
   overflow-y: scroll;
 `;
@@ -53,21 +53,32 @@ class Conversation extends Component {
     this.conversationWrapper = null;
   }
 
+  setRef = (wrapper) => {
+    this.conversationWrapper = wrapper;
+  };
+
   autoScroll = () => {
-    this.conversationWrapper.scrollTop = this.conversationWrapper.scrollHeight;
-  }
+    if (this.conversationWrapper) {
+      setTimeout(() => {
+        this.conversationWrapper.scrollTop = this.conversationWrapper.scrollHeight;
+      }, 200);
+
+      // Scrolls conversation 200ms after props update.
+      // Hacky way around VirtualDOM/DOM update lag, but couldn't find anything else.
+    }
+  };
 
   componentDidUpdate() {
-    if (this.conversationWrapper) {
-      this.autoScroll();
-    }
+    console.log("Component update");
+    this.autoScroll();
   }
 
-  renderSuggestion(suggestion) {
+  renderSuggestion(suggestion, index) {
     const { onSuggestionClicked } = this.props;
 
     return (
       <MessageBubble
+        key={`suggestion-${index}`}
         message={{ sender: "jina", text: suggestion}}
         onSuggestionClicked={onSuggestionClicked}
         suggestion
@@ -75,9 +86,10 @@ class Conversation extends Component {
     )
   }
 
-  renderLink = (link) => {
+  renderLink = (link, index) => {
     return (
       <LinkBubble
+        key={`link-${index}`}
         link={link}
         onLongPress={() => this.props.onLinkLongPress(link)}
         onClickStop={(e, enough) => this.props.onLinkClickStop(enough, link)}
@@ -85,29 +97,37 @@ class Conversation extends Component {
     );
   }
 
-  renderAvatar = (avatar, isBot = false) => (
-    <AvatarBubble avatar={{ ...avatar, isBot }} onClick={this.props.onAvatarClicked} />
-  );
+  renderAvatar = (avatar, index, isBot = false) => {
+    this.autoScroll();
 
-  renderSuggestions = (suggestions) => suggestions.map(suggestion => {
+    return (
+      <AvatarBubble
+        avatar={{ ...avatar, isBot }}
+        onClick={this.props.onAvatarClicked}
+        key={index}
+      />
+    )
+  };
+
+  renderSuggestions = (suggestions) => suggestions.map((suggestion, index) => {
     if (typeof suggestion === "object" && suggestion.type && suggestion.type === "image") {
       console.log("Suggestion is avatar", suggestion);
-      return this.renderAvatar(suggestion, true);
+      return this.renderAvatar(suggestion, index, true);
     } else if (typeof suggestion === "object" && suggestion.link) {
-      return this.renderLink(suggestion);
+      return this.renderLink(suggestion, index);
     }
 
-    return this.renderSuggestion(suggestion);
+    return this.renderSuggestion(suggestion, index);
   });
 
-  renderMessage = (message) => {
+  renderMessage = (message, index) => {
     if (message.link) {
-      return (<MessageLinkBubble link={message} />);
+      return (<MessageLinkBubble link={message} key={index} />);
     } else if (message.type && message.type === "image") {
-      return this.renderAvatar(message, message.hasOwnProperty("isBot") ? message.isBot : false);
+      return this.renderAvatar(message, index, message.hasOwnProperty("isBot") ? message.isBot : false);
     }
 
-    return (<MessageBubble message={message} />);
+    return (<MessageBubble message={message} key={index} />);
   };
 
   render() {
@@ -115,16 +135,14 @@ class Conversation extends Component {
 
     const suggestionComponents = this.renderSuggestions(suggestions);
 
-    console.log("suggestionComponents", suggestionComponents);
-
-    return [
-      <ConversationWrapper innerRef={wrapper => this.conversationWrapper = wrapper}>
-        {messages.map(message => this.renderMessage(message))}
+    return (
+      <ConversationWrapper innerRef={(wrapper) => this.setRef(wrapper)}>
+        {messages.map((message, index) => this.renderMessage(message, index))}
         {showCategoryPicker && <CategoryCarousel onPickingOver={onPickingOver}/>}
         {suggestionComponents}
         {botIsTyping && <BotIsTyping>{i18n.__("ANORAK_IS_TYPING")}</BotIsTyping>}
       </ConversationWrapper>
-    ]
+    );
   }
 }
 

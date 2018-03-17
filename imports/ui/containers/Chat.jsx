@@ -26,7 +26,10 @@ class Chat extends Component {
       isLongPressMenuOpen: false,
       linkClickCounter: 0,
       discoverLoopCounter: 0,
-      showCategoryPicker: false
+      showCategoryPicker: false,
+      isRecordingPassword: false,
+      password: "",
+      firstPassword: ""
     };
 
     if (Meteor.user()) {
@@ -54,6 +57,7 @@ class Chat extends Component {
       if (suggestions.hasOwnProperty(suggestionIndex)) {
         const delay = (suggestionIndex + 1) * 30;
 
+        // Pre-load image if suggestion is a link for a smoother experience
         if (suggestions[suggestionIndex].image) {
           (new Image()).src = suggestions[suggestionIndex].image;
         }
@@ -81,18 +85,22 @@ class Chat extends Component {
     });
   });
 
-  displayAvatars = () => {
-    this.setState({
-      suggestions: [
-        { type: "image", url: "/avatar/Astronomer_Bright.png" },
-        { type: "image", url: "/avatar/Explorer_Bright.png" },
-        { type: "image", url: "/avatar/Hacker_Bright.png" },
-        { type: "image", url: "/avatar/Musician_Bright.png" },
-        { type: "image", url: "/avatar/Scientist_Bright.png" },
-        { type: "image", url: "/avatar/Warrior_Bright.png" }
-      ]
-    });
-  };
+  awaitCategoryPicking = () => new Promise((resolve, reject) => this.setState({
+    onCategoriesPicked: resolve,
+    showCategoryPicker: true
+  }));
+
+  displayAvatars = (resolve) => this.setState({
+    suggestions: [
+      { type: "image", url: "/avatar/Astronomer_Bright.png" },
+      { type: "image", url: "/avatar/Explorer_Bright.png" },
+      { type: "image", url: "/avatar/Hacker_Bright.png" },
+      { type: "image", url: "/avatar/Musician_Bright.png" },
+      { type: "image", url: "/avatar/Scientist_Bright.png" },
+      { type: "image", url: "/avatar/Warrior_Bright.png" }
+    ],
+    onAvatarClick: resolve
+  });
 
   greet(isFirstMessage = false) {
     import partOfDay from "humanized-part-of-day";
@@ -220,6 +228,7 @@ class Chat extends Component {
     console.log("registerUsernameIfNotTaken");
 
     this.setState({
+      onReply: null,
       registering: true,
       userName
     });
@@ -237,7 +246,34 @@ class Chat extends Component {
     });
   });
 
-  pickUsername = (isRetry = false) => new Promise((resolve, reject) => {
+  checkIfUserQuotaNotOver = () => new Promise((resolve, reject) => {
+    if (Meteor.users.find().count() > 100) {
+      this.sendJinaResponse(i18n.__("JINA_USER_QUOTA_REACHED"))
+        .then(() => this.sendJinaResponse(i18n.__("JINA_USER_QUOTA_EMAIL_CTA")))
+        .then(() => this.setState({
+          quotaCtaEmailCapture: true,
+          suggestions: [i18n.__("SUGGESTION_EMAIL_CTA_YES"), i18n.__("SUGGESTION_EMAIL_CTA_NO")]
+        }));
+    } else {
+      resolve();
+    }
+  });
+
+  agreeToPrivacyPolicy = () => new Promise((resolve, reject) => {
+    this.sendJinaResponse(i18n.__("JINA_REGISTRATION_GREETING"))
+      .then(() => this.sendJinaResponse(i18n.__("JINA_REGISTRATION_GREETING_2")))
+      .then(() => this.awaitSuggestionChoice([
+        i18n.__("SUGGESTION_REGISTRATION_PRIVACY_YES"),
+        i18n.__("SUGGESTION_REGISTRATION_PRIVACY_NO")
+      ]))
+      .then((choice) => {
+        if (choice.includes(i18n.__("SUGGESTION_REGISTRATION_PRIVACY_YES"))) {
+          resolve();
+        }
+      });
+  });
+
+  pickUsername = (isRetry = false, oldResolve = null) => new Promise((resolve, reject) => {
     this.sendJinaResponse(i18n.__(isRetry ? "ANORAK_REGISTRATION_USERNAME_TAKEN" : "ANORAK_REGISTRATION_PICK_USERNAME", {
       userName: this.state.lastMessage
     }))
@@ -246,19 +282,196 @@ class Chat extends Component {
       .then(() => {
         // Username is available
 
-        this.sendJinaResponse(i18n.__("ANORAK_REGISTRATION_AGREE_TOC", {
-          userName: this.state.lastMessage
-        }), {
-          link: "https://undermind.typeform.com/to/BJumJz"
-        });
+        console.log("pickUsername resolve()");
 
-        resolve();
+        if (oldResolve) {
+          oldResolve();
+        } else {
+          resolve();
+        }
       }, () => {
         // Username is taken
 
-        this.pickUsername(true);
+        this.pickUsername(true, resolve);
       })
   });
+
+  pickEmail = () => new Promise((resolve, reject) => {
+    this.sendJinaResponse(i18n.__("ANORAK_REGISTRATION_PICK_EMAIL", {
+      userName: this.state.userName
+    }))
+    .then(this.awaitReply)
+    .then((email) => {
+      this.setState({ email });
+
+      resolve();
+    });
+  });
+
+  pickGender = () => new Promise((resolve, reject) => {
+    this.sendJinaResponse(i18n.__("ANORAK_REGISTRATION_PICK_GENDER"))
+      .then(() => this.awaitSuggestionChoice([
+        i18n.__("SUGGESTION_GENDER_MALE"),
+        i18n.__("SUGGESTION_GENDER_FEMALE")
+      ]))
+      .then((gender) => {
+        console.log("Gender picked", gender);
+
+        this.setState({ gender });
+
+        resolve();
+      });
+  });
+
+  pickAvatar = () => new Promise((resolve, reject) => {
+    this.sendJinaResponse(i18n.__("ANORAK_REGISTRATION_PICK_AVATAR"))
+      .then(() => this.displayAvatars(resolve)); // Resolve handler is called when user chooses avatar
+  });
+
+  pickPassword = (reason = "", oldResolve = null) => new Promise((resolve, reject) => {
+    let message;
+
+    console.log(`pickPassword(${reason}) with firstPassword.length ${this.state.firstPassword.length}`);
+
+    switch (reason) {
+      case "LENGTH":
+        message = "ANORAK_REGISTRATION_PASSWORD_LENGTH_ERROR";
+        break;
+
+      case "CAPITAL":
+        message = "ANORAK_REGISTRATION_PASSWORD_CAPITAL_ERROR";
+        break;
+
+      case "NUMBER":
+        message = "ANORAK_REGISTRATION_PASSWORD_NUMBER_ERROR";
+        break;
+
+      case "CONFIRM":
+        message = "ANORAK_REGISTRATION_PASSWORD_CONFIRM";
+        break;
+
+      case "NO_MATCH":
+        message = "ANORAK_REGISTRATION_PASSWORD_CONFIRM_NO_MATCH";
+        break;
+
+      default:
+        message = "UNDERMIND_REGISTRATION_PASSWORD_PROMPT";
+        break;
+    }
+
+    return this.sendJinaResponse(i18n.__(message, { userName: this.state.userName }))
+      .then(() => this.setState({ isRecordingPassword: true }))
+      .then(this.awaitReply)
+      .then(() => {
+        const { password } = this.state;
+
+        this.setState({ isRecordingPassword: false });
+
+        if (password.length < 6) {
+          this.pickPassword("LENGTH", oldResolve ? oldResolve : resolve);
+        } else if (!password.match(/[A-Z]/)) {
+          this.pickPassword("CAPITAL", oldResolve ? oldResolve : resolve);
+        } else if (!password.match(/[0-9]/)) {
+          this.pickPassword("NUMBER", oldResolve ? oldResolve : resolve);
+        } else if (reason !== "CONFIRM") {
+          this.pickPassword("CONFIRM", oldResolve ? oldResolve : resolve);
+        } else if (reason === "CONFIRM" && this.state.firstPassword === this.state.password) {
+          if (oldResolve) {
+            console.log("oldResolve()");
+            oldResolve(password);
+          } else {
+            console.log("resolve()");
+            resolve(password);
+          }
+        } else {
+          this.setState({ firstPassword: "" });
+          this.pickPassword("NO_MATCH", oldResolve ? oldResolve : resolve);
+        }
+      });
+  });
+
+  pickAge = () => new Promise((resolve, reject) => {
+    this.sendJinaResponse(i18n.__("ANORAK_REGISTRATION_AGE_CHECK"))
+      .then(() => this.awaitReply())
+      .then((choice) => {
+        this.setState({ onReply: null });
+
+        if (parseInt(choice) <= 13) {
+          this.sendJinaResponse(i18n.__("ANORAK_REGISTRATION_TOO_YOUNG"));
+        } else {
+          this.sendJinaResponse(i18n.__("ANORAK_REGISTRATION_AGE_OK"))
+            .then(resolve);
+        }
+      });
+  });
+
+  agreeTermsAndConditions = () => new Promise((resolve, reject) => {
+    this.sendJinaResponse(i18n.__("ANORAK_REGISTRATION_AGREE_TOC", {
+      userName: this.state.userName
+    }), {
+      link: "https://undermind.typeform.com/to/BJumJz"
+    })
+      .then(() => this.awaitSuggestionChoice([
+        i18n.__("SUGGESTION_AGREE"),
+        i18n.__("SUGGESTION_DISAGREE")
+      ]))
+      .then((choice) => {
+        this.setState({ onSuggestionChoice: null });
+
+        if (choice.includes(i18n.__("SUGGESTION_AGREE"))) {
+          resolve();
+        } else {
+          this.sendJinaResponse(i18n.__("ANORAK_REGISTRATION_TOC_NOT_AGREE"));
+        }
+      });
+  });
+
+  finalizeRegistration = () => new Promise(async (resolve, reject) => {
+    const { Accounts } = await import("meteor/accounts-base");
+
+    Accounts.createUser({
+      username: this.state.userName,
+      email: this.state.email,
+      password: this.state.password,
+      profile: {
+        avatar: this.state.avatar,
+        level: 1,
+        xp: 0,
+        tokens: 0
+      }
+    }, (err) => {
+      if (err) {
+        this.sendJinaResponse(i18n.__("JINA_ERROR_SOMETHING_WENT_WRONG", { err }));
+      } else {
+        if (Meteor.isProduction) {
+          analytics.identify(Meteor.userId(), {
+            email: Meteor.user().emails[0].address,
+            name: Meteor.user().username
+          });
+        }
+
+        resolve();
+      }
+    });
+  });
+
+  pickCategories = () => new Promise((resolve, reject) => {
+    this.sendJinaResponse(i18n.__("ANORAK_REGISTRATION_CATEGORY_PICK"))
+      .then(this.awaitCategoryPicking)
+      .then(resolve);
+  });
+
+  greetNewUser = () => {
+    this.sendJinaResponse(i18n.__("ANORAK_REGISTRATION_WELCOME_1"))
+      .then(() => this.sendJinaResponse(i18n.__("ANORAK_REGISTRATION_WELCOME_2")))
+      .then(() => {
+        this.setState({ registering: false });
+
+        return this.sendJinaResponse(i18n.__("ANORAK_REGISTRATION_WELCOME_3"));
+      })
+      .then(() => this.awaitSuggestionChoice([i18n.__("SUGGESTION_I_M_READY")]))
+      .then(this.greet);
+  };
 
   /**
    * Push typed message into the `conversation` state array, and perform additional operations if needed
@@ -277,7 +490,8 @@ class Chat extends Component {
       onReply,
       registering,
       userName,
-      gender
+      gender,
+      isRecordingPassword
     } = this.state;
 
     let typedMessage = this.state.typedMessage;
@@ -310,10 +524,13 @@ class Chat extends Component {
       });
     }
 
-    const userIsTypingPassword = (authenticating && userName.length > 0) ||
-      (registering && userName.length > 0 && email.length > 0 && gender.length > 0);
+    if (isRecordingPassword) {
+      if (this.state.password) {
+        this.setState({ firstPassword: this.state.password });
+      }
 
-    if (userIsTypingPassword) {
+      this.setState({ password: typedMessage });
+
       // If user has typed a pasword, replace characters by dots before pushing it to conversation
 
       typedMessage = Array.prototype.map.call(typedMessage, () => "●");
@@ -346,14 +563,14 @@ class Chat extends Component {
       return onSuggestionChoice(typedMessage);
     }
 
-    if (!userIsTypingPassword && typedMessage && typedMessage.toLowerCase().includes(i18n.__("STUDENT"))) {
+    if (!isRecordingPassword && typedMessage && typedMessage.toLowerCase().includes(i18n.__("STUDENT"))) {
       this.startLoginScript();
-    } else if (!userIsTypingPassword && typedMessage && typedMessage.toLowerCase().includes(i18n.__("NEWCOMER"))) {
+    } else if (!isRecordingPassword && typedMessage && typedMessage.toLowerCase().includes(i18n.__("NEWCOMER"))) {
       this.startSignUpScript();
     }
 
     // If user is authenticating and has typed password, attempt to log in
-    if (authenticating && userIsTypingPassword) {
+    if (authenticating && isRecordingPassword) {
       Meteor.loginWithPassword(userName, this.state.typedMessage, (err) => {
         if (err) {
           this.sendJinaResponse(i18n.__("JINA_ERROR_SOMETHING_WENT_WRONG", { err }))
@@ -370,38 +587,6 @@ class Chat extends Component {
         }
       });
     }
-    // If user is registering and has typed password, attempt to register
-    else if (registering && userIsTypingPassword) {
-      import { Accounts } from "meteor/accounts-base";
-
-      Accounts.createUser({
-        username: userName,
-        email: email,
-        password: this.state.typedMessage, // State reference to typedMessage because local one is obfuscated
-        profile: {
-          avatar: this.state.avatar,
-          level: 1,
-          xp: 0,
-          tokens: 0
-        }
-      }, (err) => {
-        if (err) {
-          this.sendJinaResponse(i18n.__("JINA_ERROR_SOMETHING_WENT_WRONG", { err }));
-        } else {
-          // Greet new user
-
-          if (Meteor.isProduction) {
-            analytics.identify(Meteor.userId(), {
-              email: Meteor.user().emails[0].address,
-              name: Meteor.user().username
-            });
-          }
-
-          this.sendJinaResponse(i18n.__("ANORAK_REGISTRATION_CATEGORY_PICK"))
-            .then(() => this.setState({ showCategoryPicker: true }));
-          }
-      });
-    }
     // If user has typed username but hasn't typed password yet
     else if (this.state.authenticating) {
       // Check if username is correct
@@ -415,27 +600,6 @@ class Chat extends Component {
           this.sendJinaResponse(i18n.__("JINA_ERROR_USER_NOT_FOUND", { userName: typedMessage }));
         }
       });
-    }
-    // If user is registering, has entered user name and has entered email
-    else if (this.state.registering && this.state.userName && this.state.email) {
-
-    }
-    // If user is registering and has entered email
-    else if (this.state.registering && this.state.userName) {
-      this.setState({ email: typedMessage });
-
-      this.sendJinaResponse(i18n.__("ANORAK_REGISTRATION_PICK_GENDER"))
-        .then(() => this.awaitSuggestionChoice([
-          i18n.__("SUGGESTION_GENDER_MALE"),
-          i18n.__("SUGGESTION_GENDER_FEMALE")
-        ]))
-        .then((gender) => {
-          this.setState({ gender });
-
-          this.sendJinaResponse(i18n.__("ANORAK_REGISTRATION_PICK_AVATAR"));
-
-          this.displayAvatars();
-        });
     }
     // If user asks for privacy policy
     else if (this.state.privacyPolicyCapture && typedMessage.includes(i18n.__("SUGGESTION_REGISTRATION_PRIVACY_NO"))) {
@@ -490,34 +654,37 @@ class Chat extends Component {
    * @param options : Object (optional)
    */
 
-  sendJinaResponse(message, options = {}) {
-    return new Promise((resolve, reject) => {
-      this.setState({ isTyping: true });
+  sendJinaResponse = (message, options = {}) => new Promise((resolve, reject) => {
+    this.setState({
+      isTyping: true,
+      onReply: null,
+      onSuggestionChoice: null
+    });
 
-      const conversation = this.state.conversation;
+    const conversation = this.state.conversation;
 
-      // Delay to simulate a message being typed
-      let delay = 500 + 10 * message.length;
+    // Delay to simulate a message being typed
+    let delay = 500 + 10 * message.length;
 
-      if (options.extraDelay && parseInt(options.extraDelay)) {
-        delay = delay + options.extraDelay;
+    if (options.extraDelay && parseInt(options.extraDelay)) {
+      delay = delay + options.extraDelay;
+    }
+
+    setTimeout(() => {
+      if (options.link) {
+        conversation.push({ sender: "jina", text: message, link: options.link });
+      } else {
+        conversation.push({ sender: "jina", text: message });
       }
 
-      setTimeout(() => {
-        if (options.link) {
-          conversation.push({ sender: "jina", text: message, link: options.link });
-        } else {
-          conversation.push({ sender: "jina", text: message });
-        }
+      this.setState({ conversation }, () => {
+        this.setState({ isTyping: false });
 
-        this.setState({ conversation }, () => {
-          this.setState({ isTyping: false });
-
-          resolve();
-        });
-      }, options.noDelay ? 0 : delay);
-    });
-  }
+        console.log("sendJinaResponse resolve()");
+        resolve();
+      });
+    }, options.noDelay ? 0 : delay);
+  });
 
   /**
    * Start login phase
@@ -541,44 +708,17 @@ class Chat extends Component {
    */
 
   startSignUpScript() {
-    if (Meteor.users.find().count() > 100) {
-      this.sendJinaResponse(i18n.__("JINA_USER_QUOTA_REACHED"))
-        .then(() => this.sendJinaResponse(i18n.__("JINA_USER_QUOTA_EMAIL_CTA")))
-        .then(() => this.setState({
-          quotaCtaEmailCapture: true,
-          suggestions: [i18n.__("SUGGESTION_EMAIL_CTA_YES"), i18n.__("SUGGESTION_EMAIL_CTA_NO")]
-        }));
-    } else {
-      this.sendJinaResponse(i18n.__("JINA_REGISTRATION_GREETING"))
-        .then(() => this.sendJinaResponse(i18n.__("JINA_REGISTRATION_GREETING_2")))
-        .then(() => this.awaitSuggestionChoice([
-          i18n.__("SUGGESTION_REGISTRATION_PRIVACY_YES"),
-          i18n.__("SUGGESTION_REGISTRATION_PRIVACY_NO")
-        ]))
-        .then((choice) => {
-          if (choice.includes(i18n.__("SUGGESTION_REGISTRATION_PRIVACY_YES"))) {
-            this.pickUsername()
-              .then(() => this.awaitSuggestionChoice([i18n.__("SUGGESTION_AGREE"), i18n.__("SUGGESTION_DISAGREE")]))
-              .then(() => {
-                this.setState({ onSuggestionChoice: null });
-                this.sendJinaResponse(i18n.__("ANORAK_REGISTRATION_PICK_EMAIL", { userName: this.state.lastMessage }))
-              })
-
-
-            // this.sendJinaResponse(i18n.__("ANORAK_REGISTRATION_AGE_CHECK"))
-            //   .then(() => this.awaitReply())
-            //   .then((choice) => {
-            //     this.setState({ onReply: null, onSuggestionChoice: null });
-            //
-            //     if (parseInt(choice) <= 13) {
-            //       this.sendJinaResponse(i18n.__("ANORAK_REGISTRATION_TOO_YOUNG"));
-            //     } else {
-            //       this.sendJinaResponse(i18n.__("ANORAK_REGISTRATION_AGE_OK"));
-            //     }
-            //   });
-          }
-        });
-    }
+    this.checkIfUserQuotaNotOver()
+      .then(this.pickUsername)
+      .then(this.pickEmail)
+      .then(this.pickPassword)
+      .then(this.pickAge)
+      .then(this.pickGender)
+      .then(this.pickAvatar)
+      .then(this.agreeTermsAndConditions)
+      .then(this.finalizeRegistration)
+      .then(this.pickCategories)
+      .then(this.greetNewUser);
   }
 
   /**
@@ -604,9 +744,7 @@ class Chat extends Component {
           ...this.state.conversation,
           { type: "image", url }
         ]
-      }, () => this.sendJinaResponse(i18n.__("UNDERMIND_REGISTRATION_PASSWORD_PROMPT", {
-        userName: this.state.userName
-      })));
+      }, () => this.state.onAvatarClick());
     }
   }
 
@@ -686,16 +824,8 @@ class Chat extends Component {
       }
     });
 
-    this.sendJinaResponse(i18n.__("ANORAK_REGISTRATION_WELCOME_1"))
-      .then(() => this.sendJinaResponse(i18n.__("ANORAK_REGISTRATION_WELCOME_2")))
-      .then(() => {
-        this.setState({ registering: false });
-
-        return this.sendJinaResponse(i18n.__("ANORAK_REGISTRATION_WELCOME_3"));
-      })
-      .then(() => this.awaitSuggestionChoice([i18n.__("SUGGESTION_I_M_READY")]))
-      .then(() => this.greet());
-  }
+    this.state.onCategoriesPicked();
+  };
 
   handleSaveForLater = () => {
     Meteor.call("content/saveForLater", this.state.longPressedLink.id, (error, result) => {
@@ -720,14 +850,8 @@ class Chat extends Component {
   };
 
   render() {
-    const userIsTypingPassword = (this.state.authenticating && this.state.userName.length > 0) ||
-      (this.state.registering &&
-      this.state.userName.length > 0 &&
-      this.state.email.length > 0 &&
-      this.state.gender.length > 0);
-
     return [
-      <Header {...this.props} />,
+      <Header {...this.props} key={"header"} />,
       <Conversation
         messages={this.state.conversation}
         suggestions={this.state.suggestions}
@@ -738,19 +862,22 @@ class Chat extends Component {
         onLinkLongPress={this.handleLinkLongPress}
         onLinkClickStop={this.handleLinkClickStop}
         onPickingOver={this.handleCategoryPickingOver}
+        key={"conversation"}
       />,
       <LongPressMenu
         visible={this.state.isLongPressMenuOpen}
         onSaveForLaterClick={this.handleSaveForLater}
         onReportClick={this.handleReport}
+        key={"longPressMenu"}
       />,
       <MessageBox
         {...this.props} // Passing history
         message={this.state.typedMessage}
-        isRecordingPassword={userIsTypingPassword}
+        isRecordingPassword={this.state.isRecordingPassword}
         onSend={this.handleMessageSend}
         onChange={this.handleMessageChange}
         setMessageInputRef={(node) => { this.messageInput = node }}
+        key={"messageBox"}
       />
     ];
   }

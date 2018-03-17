@@ -8,6 +8,12 @@ const HeaderWrapper = styled.div`
   flex-direction: column;
   
   height: 6rem;
+  
+  position: fixed;
+  z-index: 9;
+  width: 100%;
+  
+  background: white;
 `;
 
 const Switch = styled.div`
