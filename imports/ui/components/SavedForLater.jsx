@@ -66,6 +66,9 @@ const BackButton = styled.button`
   
   position: absolute;
   left: 1rem;
+  top: -31px;
+  
+  z-index: 10;
   
   background: transparent;
   border: none;
@@ -79,8 +82,15 @@ const TrashButton = styled.button`
   border: none;
 `;
 
+const Wrapper = styled.div`
+  width: 100%;
+  height: 100vh;
+  
+  padding-top: 6rem;
+`;
+
 const SavedForLater = ({ content, history, onDelete }) => (
-  <div>
+  <Wrapper>
     <NavigationRow>
       <BackButton onClick={() => history.push("/")}><i className={"fa fa-chevron-left"} /></BackButton>
       <h2>Saved courses</h2>
@@ -101,7 +111,7 @@ const SavedForLater = ({ content, history, onDelete }) => (
         </TrashButton>
       </ContentRow>
     ))}
-  </div>
+  </Wrapper>
 );
 
 export default SavedForLater;
