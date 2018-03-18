@@ -177,7 +177,7 @@ class Chat extends Component {
       this.sendJinaResponse(i18n.__("CONTENT_OVER"))
     } else {
         Meteor.callPromise("content/getRandomFromCategory", type, skill.split(" ")[0])
-        .then(async (content) => {
+        .then((content) => {
           const filteredContent = content.map((row) => ({
             id: row.row_id,
             type: row.material_type,
@@ -200,13 +200,9 @@ class Chat extends Component {
               }
             });
 
-            const { AllHtmlEntities } = await import("html-entities");
+            console.log("BEFORE_SHOWING_CONTENT skill", skill);
 
-            const entities = new AllHtmlEntities();
-
-            this.sendJinaResponse(i18n.__("BEFORE_SHOWING_CONTENT", {
-              skill: entities.decode(skill)
-            }), { noDelay: true });
+            this.sendJinaResponse(i18n.__("BEFORE_SHOWING_CONTENT", { skill }), { noDelay: true });
           }
 
           filteredContent.push(i18n.__("CONTINUE_DISCOVER_PROGRAM"));
@@ -606,12 +602,18 @@ class Chat extends Component {
    * @param options : Object (optional)
    */
 
-  sendJinaResponse = (message, options = {}) => new Promise((resolve, reject) => {
+  sendJinaResponse = (message, options = {}) => new Promise(async (resolve, reject) => {
     this.setState({
       isTyping: true,
       onReply: null,
       onSuggestionChoice: null
     });
+
+    const { XmlEntities } = await import("html-entities");
+
+    const entities = new XmlEntities();
+
+    message = entities.decode(message);
 
     const conversation = this.state.conversation;
 
