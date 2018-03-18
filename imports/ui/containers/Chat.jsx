@@ -18,8 +18,6 @@ class Chat extends Component {
       ],
       suggestions: [i18n.__("SUGGESTION_I_AM_MEMBER"), i18n.__("SUGGESTION_I_AM_NEWCOMER")],
       typedMessage: "",
-      authenticating: false,
-      registering: false,
       userName: "",
       email: "",
       gender: "",
@@ -108,27 +106,20 @@ class Chat extends Component {
     // Greet user
     this.sendJinaResponse(i18n.__(`JINA_WELCOME_${partOfDay.getCurrent()}`, { name: Meteor.user().username }))
       .then(() => {
-        if (isFirstMessage) {
-          this.showBriefing();
-        } else {
-          // End authentication phase
-          this.setState({
-            authenticating: false
-          }, () => {
-            this.showBriefing();
-          });
-        }
+        this.showBriefing();
       });
   }
 
-  getRandomSkill() {
-    import sample from "lodash/sample";
+  async getRandomSkill() {
+    const sample = await import("lodash/sample");
 
     const userSkills = Meteor.user().profile.skills;
 
-    const randomSkill = sample(userSkills).slug;
+    const randomSkill = sample.default(userSkills).slug;
 
     const skillTitle = getCategoryBySlug(randomSkill).title;
+
+    console.log("getRandomSkill", getCategoryBySlug(randomSkill));
 
     if (this.state.latestDiscover && skillTitle === this.state.latestDiscover.skill) {
       return this.getRandomSkill();
@@ -155,17 +146,18 @@ class Chat extends Component {
         .then((message) => {
           this.setState({ onSuggestionChoice: null });
 
-          const skill = this.getRandomSkill();
-
-          if (message.includes(i18n.__("VIDEO"))) {
-            this.displayDiscover("video", skill);
-          } else if (message.includes(i18n.__("COURSE"))) {
-            this.displayDiscover("classes", skill);
-          } else if (message.includes(i18n.__("ARTICLE"))) {
-            this.displayDiscover("article", skill);
-          } else {
-            this.sendJinaResponse(i18n.__("ANORAK_UNDERSTANDING_ERROR"));
-          }
+          this.getRandomSkill()
+            .then((skill) => {
+              if (message.includes(i18n.__("VIDEO"))) {
+                this.displayDiscover("video", skill);
+              } else if (message.includes(i18n.__("COURSE"))) {
+                this.displayDiscover("classes", skill);
+              } else if (message.includes(i18n.__("ARTICLE"))) {
+                this.displayDiscover("article", skill);
+              } else {
+                this.sendJinaResponse(i18n.__("ANORAK_UNDERSTANDING_ERROR"));
+              }
+            });
         });
     }
   }
@@ -178,12 +170,14 @@ class Chat extends Component {
    */
 
   displayDiscover(type, skill) {
+    console.log(`displayDiscover(${type}, ${skill})`);
+
     if (Meteor._localStorage.getItem("contentOverUntil") &&
       parseInt(Meteor._localStorage.getItem("contentOverUntil")) > new Date().getTime()) {
       this.sendJinaResponse(i18n.__("CONTENT_OVER"))
     } else {
-        Meteor.callPromise("content/getRandomFromCategory", type, skill)
-        .then((content) => {
+        Meteor.callPromise("content/getRandomFromCategory", type, skill.split(" ")[0])
+        .then(async (content) => {
           const filteredContent = content.map((row) => ({
             id: row.row_id,
             type: row.material_type,
@@ -194,8 +188,10 @@ class Chat extends Component {
             community: row.community || ""
           }));
 
+          console.dir("filteredContent", filteredContent);
+
           if (filteredContent.length < 1) {
-            return this.displayDiscover(type, this.getRandomSkill());
+            return this.getRandomSkill().then((nextSkill) => this.displayDiscover(type, nextSkill));
           } else {
             this.setState({
               latestDiscover: {
@@ -204,7 +200,7 @@ class Chat extends Component {
               }
             });
 
-            import { AllHtmlEntities } from "html-entities";
+            const { AllHtmlEntities } = await import("html-entities");
 
             const entities = new AllHtmlEntities();
 
@@ -227,7 +223,6 @@ class Chat extends Component {
 
     this.setState({
       onReply: null,
-      registering: true,
       userName
     });
 
@@ -462,11 +457,7 @@ class Chat extends Component {
   greetNewUser = () => {
     this.sendJinaResponse(i18n.__("ANORAK_REGISTRATION_WELCOME_1"))
       .then(() => this.sendJinaResponse(i18n.__("ANORAK_REGISTRATION_WELCOME_2")))
-      .then(() => {
-        this.setState({ registering: false });
-
-        return this.sendJinaResponse(i18n.__("ANORAK_REGISTRATION_WELCOME_3"));
-      })
+      .then(() =>  this.sendJinaResponse(i18n.__("ANORAK_REGISTRATION_WELCOME_3")))
       .then(() => this.awaitSuggestionChoice([i18n.__("SUGGESTION_I_M_READY")]))
       .then(this.greet);
   };
@@ -481,14 +472,9 @@ class Chat extends Component {
     if (event) event.preventDefault();
 
     const {
-      authenticating,
       conversation,
-      email,
       onSuggestionChoice,
       onReply,
-      registering,
-      userName,
-      gender,
       isRecordingPassword
     } = this.state;
 
@@ -513,7 +499,7 @@ class Chat extends Component {
         if (typedMessage.includes(i18n.__("CONTINUE_DISCOVER_PROGRAM"))) {
           this.displayDiscover(this.state.latestDiscover.type, this.state.latestDiscover.skill);
         } else if (typedMessage.includes(i18n.__("CHANGE_CATEGORY"))) {
-          this.displayDiscover(this.state.latestDiscover.type, this.getRandomSkill());
+          this.getRandomSkill().then((skill) => this.displayDiscover(this.state.latestDiscover.type, skill));
         } else if (typedMessage.includes(i18n.__("START_OVER"))) {
           this.setState({ latestDiscover: null });
 
@@ -837,9 +823,8 @@ class Chat extends Component {
             ]))
             .then((choice) => {
               if (choice.includes(i18n.__("SUGGESTION_YES"))) {
-                const skill = this.getRandomSkill();
-
-                return this.displayDiscover(this.state.latestDiscover.type, skill);
+                return this.getRandomSkill()
+                  .then((skill) => this.displayDiscover(this.state.latestDiscover.type, skill));
               } else if (choice.includes(i18n.__("SUGGESTION_CALL_IT_A_DAY"))) {
                 return this.sendJinaResponse(i18n.__("BYE"));
               } else {
