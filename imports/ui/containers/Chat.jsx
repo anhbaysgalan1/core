@@ -5,8 +5,9 @@ import { analytics } from "meteor/okgrow:analytics";
 import React, { Component } from "react";
 import { compose } from "react-komposer";
 
-import { Conversation, MessageBox, Header, LongPressMenu } from "../components";
+import { Conversation, MessageBox, Header } from "../components";
 import { getCategoryBySlug } from "/imports/api/Category";
+import { SavedForLater } from "/imports/api/SavedForLater";
 
 class Chat extends Component {
   constructor() {
@@ -185,7 +186,8 @@ class Chat extends Component {
             title: row.title,
             link: row.link,
             image: row.image || "http://via.placeholder.com/150x100",
-            community: row.community || ""
+            community: row.community || "",
+            isSavedForLater: SavedForLater.findOne({ content: row.row_id })
           }));
 
           console.dir("filteredContent", filteredContent);
@@ -861,17 +863,20 @@ class Chat extends Component {
     this.state.onCategoriesPicked();
   };
 
-  handleSaveForLater = () => {
-    Meteor.call("content/saveForLater", this.state.longPressedLink.id, (error, result) => {
-      if (error) {
-        this.sendJinaResponse(error);
-      }
-
-      this.setState({
-        isLongPressMenuOpen: false,
-        longPressedLink: null
+  handleSaveForLater = (id) => {
+    if (SavedForLater.findOne({ content: id })) {
+      Meteor.call("removeSavedForLaterContent", id, (error, result) => {
+        if (error) {
+          this.sendJinaResponse(error);
+        }
       });
-    });
+    } else {
+      Meteor.call("content/saveForLater", id, (error, result) => {
+        if (error) {
+          this.sendJinaResponse(error);
+        }
+      });
+    }
   };
 
   handleReport = () => {
@@ -893,16 +898,10 @@ class Chat extends Component {
         showCategoryPicker={this.state.showCategoryPicker}
         onSuggestionClicked={this.handleSuggestionClicked}
         onAvatarClicked={this.handleAvatarClicked}
-        onLinkLongPress={this.handleLinkLongPress}
-        onLinkClickStop={this.handleLinkClickStop}
         onPickingOver={this.handleCategoryPickingOver}
-        key={"conversation"}
-      />,
-      <LongPressMenu
-        visible={this.state.isLongPressMenuOpen}
         onSaveForLaterClick={this.handleSaveForLater}
         onReportClick={this.handleReport}
-        key={"longPressMenu"}
+        key={"conversation"}
       />,
       <MessageBox
         {...this.props} // Passing history
@@ -935,7 +934,9 @@ function getTrackerLoader(reactiveMapper) {
 }
 
 function dataLoader(props, onData) {
-  if (Meteor.subscribe("users").ready() && Meteor.subscribe("categories").ready()) {
+  if (Meteor.subscribe("users").ready() &&
+    Meteor.subscribe("categories").ready() &&
+    Meteor.subscribe("savedForLater").ready()) {
     onData(null, {
       user: Meteor.user()
     });

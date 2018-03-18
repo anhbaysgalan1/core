@@ -32,6 +32,8 @@ const Link = styled.a`
   align-items: center;
   
   text-decoration: none;
+  
+  width: 100%;
 `;
 
 const Community = styled.h4`

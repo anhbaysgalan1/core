@@ -91,8 +91,8 @@ class Conversation extends Component {
       <LinkBubble
         key={`link-${index}`}
         link={link}
-        onLongPress={() => this.props.onLinkLongPress(link)}
-        onClickStop={(e, enough) => this.props.onLinkClickStop(enough, link)}
+        onSaveForLaterClick={this.props.onSaveForLaterClick}
+        onReportClick={this.props.onReportClick}
       />
     );
   }
