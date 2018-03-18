@@ -4,6 +4,7 @@ import i18n from "meteor/universe:i18n";
 
 import "normalize.css";
 
+import Header from "../components/Header";
 import Profile from "./Profile";
 import Chat from "./Chat";
 import SavedForLater from "./SavedForLater";
@@ -12,10 +13,10 @@ import NotFound from '../pages/NotFound.jsx';
 
 function getLang () {
   return (
-    navigator.languages && navigator.languages[0] ||
-    navigator.language ||
-    navigator.browserLanguage ||
-    navigator.userLanguage ||
+    // navigator.languages && navigator.languages[0] ||
+    // navigator.language ||
+    // navigator.browserLanguage ||
+    // navigator.userLanguage ||
     'en-US'
   );
 }
@@ -26,13 +27,18 @@ export default class MainLayout extends React.Component {
   render() {
     return (
       <Router>
-        <Switch>
-          <Route exact path='/' component={Chat} />
-          <Route path='/profile' component={Profile} />
-          <Route path='/about' component={About} />
-          <Route path='/savedForLater' component={SavedForLater} />
-          <Route component={NotFound} />
-        </Switch>
+        <div>
+          <Header />
+          <main>
+            <Switch>
+              <Route exact path='/' component={Chat} />
+              <Route path='/profile' component={Profile} />
+              <Route path='/about' component={About} />
+              <Route path='/savedForLater' component={SavedForLater} />
+              <Route component={NotFound} />
+            </Switch>
+          </main>
+        </div>
       </Router>
     );
   }

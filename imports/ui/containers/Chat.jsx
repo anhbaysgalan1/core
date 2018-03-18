@@ -142,7 +142,8 @@ class Chat extends Component {
         .then(() => this.awaitSuggestionChoice([
           i18n.__("SUGGESTION_COURSE"),
           i18n.__("SUGGESTION_VIDEO"),
-          i18n.__("SUGGESTION_ARTICLE")
+          i18n.__("SUGGESTION_ARTICLE"),
+          i18n.__("SUGGESTION_LECTURE")
         ]))
         .then((message) => {
           this.setState({ onSuggestionChoice: null });
@@ -155,6 +156,8 @@ class Chat extends Component {
                 this.displayDiscover("classes", skill);
               } else if (message.includes(i18n.__("ARTICLE"))) {
                 this.displayDiscover("article", skill);
+              } else if (message.includes(i18n.__("LECTURE"))) {
+                this.displayDiscover("lectures", skill);
               } else {
                 this.sendJinaResponse(i18n.__("ANORAK_UNDERSTANDING_ERROR"));
               }
@@ -890,7 +893,6 @@ class Chat extends Component {
 
   render() {
     return [
-      <Header {...this.props} key={"header"} />,
       <Conversation
         messages={this.state.conversation}
         suggestions={this.state.suggestions}

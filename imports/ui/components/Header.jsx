@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import styled from "styled-components";
 import classnames from "classnames";
+import { Link, withRouter } from "react-router-dom";
 
 const HeaderWrapper = styled.div`
   display: flex;
@@ -21,6 +22,11 @@ const Switch = styled.div`
   margin-top: .6rem;
   display: flex;
   align-items: center;
+`;
+
+const StyledLink = styled(Link)`
+  color: black;
+  text-decoration: none;
 `;
 
 const Icon = styled.i`
@@ -56,34 +62,37 @@ class Header extends Component {
       <HeaderWrapper>
         <Anorak src={`/anorak.png`} visible={currentPane === "chat"} />
         <Switch>
-          <Icon
-            className={classnames({
-              "fa": true,
-              "fa-bookmark": true,
-              "active": currentPane === "saved"
-            })}
-            onClick={() => this.props.history.push("/savedForLater")}
-          />
-          <Icon
-            className={classnames({
-              "fa": true,
-              "fa-comments": true,
-              "active": currentPane === "chat"
-            })}
-            onClick={() => this.props.history.push("/")}
-          />
-          <Icon
-            className={classnames({
-              "fa": true,
-              "fa-user": true,
-              "active": currentPane === "profile"
-            })}
-            onClick={() => this.props.history.push("/profile")}
-          />
+          <StyledLink to="/savedForLater">
+            <Icon
+              className={classnames({
+                "fa": true,
+                "fa-bookmark": true,
+                "active": currentPane === "saved"
+              })}
+            />
+          </StyledLink>
+          <StyledLink to="/">
+            <Icon
+              className={classnames({
+                "fa": true,
+                "fa-comments": true,
+                "active": currentPane === "chat"
+              })}
+            />
+          </StyledLink>
+          <StyledLink to="/profile">
+            <Icon
+              className={classnames({
+                "fa": true,
+                "fa-user": true,
+                "active": currentPane === "profile"
+              })}
+            />
+          </StyledLink>
         </Switch>
       </HeaderWrapper>
     );
   }
 }
 
-export default Header;
+export default withRouter(Header);
