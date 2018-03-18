@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import styled from "styled-components";
+import classnames from "classnames";
 
 const HeaderWrapper = styled.div`
   display: flex;
@@ -18,14 +19,20 @@ const HeaderWrapper = styled.div`
 
 const Switch = styled.div`
   margin-top: .6rem;
+  display: flex;
+  align-items: center;
 `;
 
-const Icon = styled.img`
-  height: 1.5rem;
+const Icon = styled.i`
+  font-size: 1.5rem;
   
   margin: 0 .5rem;
   
-  cursor: pointer;  
+  cursor: pointer;
+  
+  &.active {
+    color: #0F90D1;
+  }
 `;
 
 const Anorak = styled.img`
@@ -50,16 +57,28 @@ class Header extends Component {
         <Anorak src={`/anorak.png`} visible={currentPane === "chat"} />
         <Switch>
           <Icon
-            src={`/saveforlater${currentPane === "saved" ? `_active` : ``}.png`}
+            className={classnames({
+              "fa": true,
+              "fa-bookmark": true,
+              "active": currentPane === "saved"
+            })}
             onClick={() => this.props.history.push("/savedForLater")}
           />
           <Icon
-            src={`/chat${currentPane === "chat" ? `_active` : ``}.png`}
-            onClick={event => this.props.history.push("/")}
+            className={classnames({
+              "fa": true,
+              "fa-comments": true,
+              "active": currentPane === "chat"
+            })}
+            onClick={() => this.props.history.push("/")}
           />
           <Icon
-            src={`/user${currentPane === "profile" ? `_active` : ``}.png`}
-            onClick={event => this.props.history.push("/profile")}
+            className={classnames({
+              "fa": true,
+              "fa-user": true,
+              "active": currentPane === "profile"
+            })}
+            onClick={() => this.props.history.push("/profile")}
           />
         </Switch>
       </HeaderWrapper>
