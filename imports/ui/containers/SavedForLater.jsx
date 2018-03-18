@@ -33,15 +33,13 @@ class SavedForLater extends Component {
     console.log("Got content", this.state.content);
     console.log("Mapping content", this.state.content.map((current) => current.link));
 
-    return [
-      <Header {...this.props} key="header" />,
+    return (
       <SavedForLaterComponent
         {...this.props}
         content={this.state.content}
         onDelete={this.handleDeleteSavedCourse}
-        key="savedForLaterComponent"
       />
-    ];
+    );
   }
 }
 

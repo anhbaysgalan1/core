@@ -37,7 +37,6 @@ class Profile extends Component {
 
     return (
       <div>
-        <Header {...this.props} />
         {profile ?
           <div>
             <UserProfile

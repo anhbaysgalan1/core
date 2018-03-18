@@ -10,11 +10,11 @@ Meteor.methods({
     const query = mysql.format(`
       SELECT *
       FROM cd_raw_intake 
-      WHERE material_type = ?
+      WHERE material_type LIKE ?
       AND categories LIKE ?
       ORDER BY RAND()
       LIMIT 3
-    `, [category, `%${skill}%`]);
+    `, [`%${category}%`, `%${skill}%`]);
 
     const results = await connection.query(query);
 
