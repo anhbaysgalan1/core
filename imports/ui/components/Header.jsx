@@ -50,16 +50,16 @@ class Header extends Component {
         <Anorak src={`/anorak.png`} visible={currentPane === "chat"} />
         <Switch>
           <Icon
+            src={`/saveforlater${currentPane === "saved" ? `_active` : ``}.png`}
+            onClick={() => this.props.history.push("/savedForLater")}
+          />
+          <Icon
             src={`/chat${currentPane === "chat" ? `_active` : ``}.png`}
             onClick={event => this.props.history.push("/")}
           />
           <Icon
             src={`/user${currentPane === "profile" ? `_active` : ``}.png`}
             onClick={event => this.props.history.push("/profile")}
-          />
-          <Icon
-            src={`/saveforlater${currentPane === "saved" ? `_active` : ``}.png`}
-            onClick={() => this.props.history.push("/savedForLater")}
           />
         </Switch>
       </HeaderWrapper>

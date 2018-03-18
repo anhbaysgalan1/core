@@ -5,7 +5,7 @@ import styled from "styled-components";
 import UserAvatar from "./UserAvatar";
 
 const Wrapper = styled.div`
-  padding: 0 .8rem;
+  padding: 7rem .8rem 0 .8rem;
 `;
 
 const UserInfo = styled.div`
@@ -41,10 +41,10 @@ const Progress = styled.progress`
 class UserProfile extends Component {
   static propTypes = {
     avatar: PropTypes.string,
-    level: PropTypes.string,
-    xp: PropTypes.string,
-    xpMax: PropTypes.string,
-    tokens: PropTypes.string
+    level: PropTypes.number,
+    xp: PropTypes.number,
+    xpMax: PropTypes.number,
+    tokens: PropTypes.number
   };
 
   render() {
