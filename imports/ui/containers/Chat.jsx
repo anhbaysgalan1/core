@@ -156,11 +156,11 @@ class Chat extends Component {
               if (message.includes(i18n.__("VIDEO"))) {
                 this.displayDiscover("video", skill);
               } else if (message.includes(i18n.__("COURSE"))) {
-                this.displayDiscover("classes", skill);
+                this.displayDiscover("class", skill);
               } else if (message.includes(i18n.__("ARTICLE"))) {
                 this.displayDiscover("article", skill);
               } else if (message.includes(i18n.__("LECTURE"))) {
-                this.displayDiscover("lectures", skill);
+                this.displayDiscover("lecture", skill);
               } else {
                 this.sendJinaResponse(i18n.__("ANORAK_UNDERSTANDING_ERROR"));
               }
@@ -187,16 +187,21 @@ class Chat extends Component {
     } else {
       Meteor.callPromise("content/getRandomFromCategory", type, skill.split(" ")[0])
         .then((content) => {
-          const filteredContent = content.map((row) => ({
-            id: row.row_id,
-            type: row.material_type,
-            categories: row.categories,
-            title: row.title,
-            link: row.link,
-            image: row.image || "http://via.placeholder.com/150x100",
-            community: row.community || "",
-            isSavedForLater: SavedForLater.findOne({ content: row.row_id })
-          }));
+          console.log("MySQL data:", content);
+          let filteredContent = [];
+
+          if (content) {
+            filteredContent = content.map((row) => ({
+              id: row.content_id,
+              type: row.type_name,
+              categories: row.category_name,
+              title: row.content_title,
+              link: row.content_link,
+              image: row.thumbnail_link || "http://via.placeholder.com/150x100",
+              community: row.source_name || "",
+              isSavedForLater: SavedForLater.findOne({ content: row.row_id })
+            }));
+          }
 
           console.dir("filteredContent", filteredContent);
 
@@ -597,7 +602,7 @@ class Chat extends Component {
         } else if (typedMessage.includes(i18n.__("ARTICLE"))) {
           this.displayDiscover("article", this.state.latestDiscover.skill);
         } else if (typedMessage.includes(i18n.__("COURSE"))) {
-          this.displayDiscover("classes", this.state.latestDiscover.skill);
+          this.displayDiscover("class", this.state.latestDiscover.skill);
         }
       }
 
