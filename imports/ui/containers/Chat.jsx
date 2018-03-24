@@ -850,6 +850,15 @@ class Chat extends Component {
   }
 
   handleLinkClick = (link) => {
+    Meteor.call("user/storeAnalyticData", {
+      sessionId: Meteor._localStorage.getItem("Meteor.loginToken"),
+      contentId: link.id,
+      durationSeconds: 1,
+      eventStartTime: new Date().toISOString().substr(0, 19).replace('T', ' '),
+      eventTypeId: 1, // Open link
+      eventMessage: this.state.latestDiscover.type
+    });
+
     this.sendJinaResponse(i18n.__("ANORAK_DID_YOU_FINISH"))
       .then(() => this.awaitSuggestionChoice([i18n.__("SUGGESTION_YES"), i18n.__("SUGGESTION_NO")]))
       .then(async (finished) => {
