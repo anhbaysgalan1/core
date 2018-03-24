@@ -9,6 +9,7 @@ Meteor.methods({
   "user/doesUserExist": (username) => {
     return typeof Accounts.findUserByUsername(username) === "object";
   },
+
   "user/awardPoints": (materialType, categories) => {
     const currentXp = Meteor.user().profile.xp;
     const currentLevel = Meteor.user().profile.level;
@@ -81,5 +82,38 @@ Meteor.methods({
       addedXp,
       addedLevel
     }
+  },
+
+  "user/storeAnalyticData": async (data) => {
+    console.log("user/storeAnalyticData", data);
+
+    const mysql = await import("promise-mysql");
+
+    const userId = Meteor.userId();
+    const platformId = 1;
+    const { sessionId } = data || "";
+    const { contentId } = data || "";
+    const { durationSeconds } = data || 0;
+    const { eventStartTime } = data || 0;
+    const { eventTypeId } = data || 0;
+    const { eventMessage } = data || "";
+
+    let connection;
+
+    mysql.createConnection(Meteor.settings.mysql)
+      .then((connectionObject) => connection = connectionObject)
+      .then(() => connection.query(mysql.format(`
+        CALL put_ud_into_raw_intake(?,?,?,?,?,?,?,?)
+      `), [
+        sessionId,
+        userId,
+        platformId,
+        contentId,
+        durationSeconds,
+        eventStartTime,
+        eventTypeId,
+        eventMessage
+      ]))
+      .then(() => connection.end());
   }
 });
