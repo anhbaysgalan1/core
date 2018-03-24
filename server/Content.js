@@ -3,7 +3,6 @@ import { Meteor } from "meteor/meteor";
 Meteor.methods({
   "content/getRandomFromCategory": async (category, skill) => {
     const mysql = await import("promise-mysql");
-    const Analytics = await import("analytics-node");
 
     const connection = await mysql.createConnection(Meteor.settings.mysql);
 
@@ -23,8 +22,8 @@ Meteor.methods({
     return results;
   },
 
-  "content/report": (link) => {
-    import { Email } from "meteor/email";
+  "content/report": async (link) => {
+    const { Email } = await import("meteor/email");
 
     Email.send({
       from: "undermindops@gmail.com",
@@ -32,5 +31,27 @@ Meteor.methods({
       subject: "New content reported",
       text: `The following content was reported by user ${Meteor.user().username}: ${link}`
     });
+  },
+
+  "content/search": async (term) => {
+    const mysql = await import("promise-mysql");
+
+    const connection = await mysql.createConnection(Meteor.settings.mysql);
+
+    const query = mysql.format(`
+      SELECT *
+      FROM cd_raw_intake 
+      WHERE title LIKE ?
+      ORDER BY RAND()
+      LIMIT 3
+    `, [`%${term}%`]);
+
+    const results = await connection.query(query);
+
+    connection.end();
+
+    console.log(`Searched for ${term} with results`, results);
+
+    return results;
   }
 });

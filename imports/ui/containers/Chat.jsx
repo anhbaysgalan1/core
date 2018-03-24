@@ -28,7 +28,9 @@ class Chat extends Component {
       showCategoryPicker: false,
       isRecordingPassword: false,
       password: "",
-      firstPassword: ""
+      firstPassword: "",
+      isSearchMode: false,
+      lastSearchTerm: ""
     };
 
     if (Meteor.user()) {
@@ -46,7 +48,6 @@ class Chat extends Component {
     this.handleSuggestionClicked = this.handleSuggestionClicked.bind(this);
     this.startLoginScript = this.startLoginScript.bind(this);
     this.handleAvatarClicked = this.handleAvatarClicked.bind(this);
-    this.handleLinkLongPress = this.handleLinkLongPress.bind(this);
   }
 
   awaitSuggestionChoice = (suggestions) => new Promise((resolve, reject) => {
@@ -138,6 +139,8 @@ class Chat extends Component {
         time: `${unlockTime.getHours()}:${unlockTime.getMinutes()}:${unlockTime.getSeconds()}`
       }));
     } else {
+      this.setState({ isSearchMode: true });
+
       this.sendJinaResponse(i18n.__("ANORAK_BRIEFING_INTRO"))
         .then(() => this.awaitSuggestionChoice([
           i18n.__("SUGGESTION_COURSE"),
@@ -176,11 +179,13 @@ class Chat extends Component {
   displayDiscover(type, skill) {
     console.log(`displayDiscover(${type}, ${skill})`);
 
+    this.setState({ lastSearchTerm: "" });
+
     if (Meteor._localStorage.getItem("contentOverUntil") &&
       parseInt(Meteor._localStorage.getItem("contentOverUntil")) > new Date().getTime()) {
       this.sendJinaResponse(i18n.__("CONTENT_OVER"))
     } else {
-        Meteor.callPromise("content/getRandomFromCategory", type, skill.split(" ")[0])
+      Meteor.callPromise("content/getRandomFromCategory", type, skill.split(" ")[0])
         .then((content) => {
           const filteredContent = content.map((row) => ({
             id: row.row_id,
@@ -294,12 +299,12 @@ class Chat extends Component {
     this.sendJinaResponse(i18n.__("ANORAK_REGISTRATION_PICK_EMAIL", {
       userName: this.state.userName
     }))
-    .then(this.awaitReply)
-    .then((email) => {
-      this.setState({ email });
+      .then(this.awaitReply)
+      .then((email) => {
+        this.setState({ email });
 
-      resolve();
-    });
+        resolve();
+      });
   });
 
   pickGender = () => new Promise((resolve, reject) => {
@@ -463,6 +468,46 @@ class Chat extends Component {
       .then(this.greet);
   };
 
+  handleSearch = (term) => {
+    console.log("Search for", term);
+
+    const { conversation } = this.state;
+    conversation.push({ sender: "me", text: `Search for "${term}"` });
+
+    this.setState({
+      conversation,
+      typedMessage: "",
+      suggestions: [],
+      lastSearchTerm: term,
+      latestDiscover: null
+    });
+
+    return this.sendJinaResponse(i18n.__("BEFORE_SHOWING_SEARCH_RESULTS", { term }))
+      .then(() => Meteor.callPromise("content/search", term))
+      .then((result) => {
+        console.log("Got result:", result);
+
+        const filteredContent = result.map((row) => ({
+          id: row.row_id,
+          type: row.material_type,
+          categories: row.categories,
+          title: row.title,
+          link: row.link,
+          image: row.image || "http://via.placeholder.com/150x100",
+          community: row.community || "",
+          isSavedForLater: SavedForLater.findOne({ content: row.row_id })
+        }));
+
+        filteredContent.push(i18n.__("CONTINUE_DISCOVER_PROGRAM"));
+        filteredContent.push(i18n.__("START_OVER"));
+
+        return this.awaitSuggestionChoice(filteredContent);
+      })
+      .then((choice) => {
+        console.log("Choice", choice);
+      });
+  };
+
   /**
    * Push typed message into the `conversation` state array, and perform additional operations if needed
    *
@@ -476,19 +521,31 @@ class Chat extends Component {
       conversation,
       onSuggestionChoice,
       onReply,
-      isRecordingPassword
+      isRecordingPassword,
+      isSearchMode
     } = this.state;
 
     let typedMessage = this.state.typedMessage;
+    const searchTerm = typedMessage;
 
     this.setState({
       suggestions: [],
       lastMessage: typedMessage
     });
 
+    console.log("state lastSearchTerm", this.state.lastSearchTerm);
+    console.log("typedMessage", typedMessage);
+
     if (typedMessage.includes(i18n.__("CONTINUE_DISCOVER_PROGRAM")) ||
       typedMessage.includes(i18n.__("CHANGE_CATEGORY")) ||
       typedMessage.includes(i18n.__("START_OVER"))) {
+      console.log("Message is instruction");
+
+      if (typedMessage.includes(i18n.__("CONTINUE_DISCOVER_PROGRAM")) && this.state.lastSearchTerm.length > 0) {
+        console.log("Calling handleSearch with", this.state.lastSearchTerm);
+        return this.handleSearch(this.state.lastSearchTerm);
+      }
+
       this.setState({
         discoverLoopCounter: this.state.discoverLoopCounter + 1
       }, () => {
@@ -497,7 +554,7 @@ class Chat extends Component {
           Meteor._localStorage.setItem("contentOverUntil", currentDate.getTime() + 4 * 3600 * 1000);
         }
 
-        if (typedMessage.includes(i18n.__("CONTINUE_DISCOVER_PROGRAM"))) {
+        if (typedMessage.includes(i18n.__("CONTINUE_DISCOVER_PROGRAM") && this.state.latestDiscover)) {
           this.displayDiscover(this.state.latestDiscover.type, this.state.latestDiscover.skill);
         } else if (typedMessage.includes(i18n.__("CHANGE_CATEGORY"))) {
           this.getRandomSkill().then((skill) => this.displayDiscover(this.state.latestDiscover.type, skill));
@@ -516,21 +573,22 @@ class Chat extends Component {
 
       this.setState({ password: typedMessage });
 
-      // If user has typed a pasword, replace characters by dots before pushing it to conversation
+      // If user has typed a password, replace characters by dots before pushing it to conversation
 
       typedMessage = Array.prototype.map.call(typedMessage, () => "●");
     }
 
+    console.log("handleMessageSend onSuggestionChoice", onSuggestionChoice);
+
+    // if (isSearchMode &&
+    //   typeof typedMessage === "string" &&
+    //   !typedMessage.includes(i18n.__("CONTINUE_DISCOVER_PROGRAM")) &&
+    //   !typedMessage.includes(i18n.__("START_OVER"))) {
+    //   typedMessage = `Search for "${typedMessage}"`;
+    // }
+
     // Push message to conversation
     conversation.push({ sender: "me", text: typedMessage });
-
-    if (onReply) {
-      console.log("Responding to awaitReply");
-
-      this.setState({ typedMessage: "" });
-
-      return onReply(typedMessage);
-    }
 
     if (onSuggestionChoice) {
       if (this.state.latestDiscover) {
@@ -546,6 +604,14 @@ class Chat extends Component {
       this.setState({ conversation, typedMessage: "" });
 
       return onSuggestionChoice(typedMessage);
+    }
+
+    if (onReply) {
+      console.log("Responding to awaitReply");
+
+      this.setState({ typedMessage: "" });
+
+      return onReply(typedMessage);
     }
 
     if (!isRecordingPassword && typedMessage && typedMessage.toLowerCase().includes(i18n.__("STUDENT"))) {
@@ -639,7 +705,6 @@ class Chat extends Component {
       this.setState({ conversation }, () => {
         this.setState({ isTyping: false });
 
-        console.log("sendJinaResponse resolve()");
         resolve();
       });
     }, options.noDelay ? 0 : delay);
@@ -769,10 +834,51 @@ class Chat extends Component {
    */
 
   handleSuggestionClicked(event, message) {
+    console.log("handleSuggestionClicked", message);
+
     this.setState({ typedMessage: message.text, suggestions: [] }, () => {
       this.handleMessageSend(event);
     });
   }
+
+  handleLinkClick = (link) => {
+    this.sendJinaResponse(i18n.__("ANORAK_DID_YOU_FINISH"))
+      .then(() => this.awaitSuggestionChoice([i18n.__("SUGGESTION_YES"), i18n.__("SUGGESTION_NO")]))
+      .then(async (finished) => {
+        if (finished === i18n.__("SUGGESTION_YES")) {
+          await this.sendJinaResponse(i18n.__("ANORAK_CONGRATULATIONS"))
+            .then(() => Meteor.call("user/awardPoints", link.type, link.categories, (error, summary) => {
+              this.sendImage("/avatar_win.png")
+                .then(async () => await this.sendJinaResponse(i18n.__("ANORAK_POINTS_SUMMARY", summary)));
+            }));
+        } else {
+          await this.sendJinaResponse(i18n.__("ANORAK_SAVE_FOR_LATER"))
+            .then(() => this.awaitSuggestionChoice([i18n.__("SUGGESTION_YES"), i18n.__("SUGGESTION_NO")]))
+            .then((saveForLater) => {
+              if (saveForLater === i18n.__("SUGGESTION_YES")) {
+                Meteor.call("content/saveForLater", link.id, async (error) => {
+                  await this.sendJinaResponse(i18n.__("ANORAK_SAVED_FOR_LATER"));
+                });
+              }
+            });
+        }
+      })
+      .then(() => this.sendJinaResponse(i18n.__("KEEP_LEARNING"), { extraDelay: 500 }))
+      .then(() => this.awaitSuggestionChoice([
+        i18n.__("SUGGESTION_YES"),
+        i18n.__("SUGGESTION_CALL_IT_A_DAY")
+      ]))
+      .then((choice) => {
+        if (choice.includes(i18n.__("SUGGESTION_YES"))) {
+          return this.getRandomSkill()
+            .then((skill) => this.displayDiscover(this.state.latestDiscover.type, skill));
+        } else if (choice.includes(i18n.__("SUGGESTION_CALL_IT_A_DAY"))) {
+          return this.sendJinaResponse(i18n.__("BYE"));
+        } else {
+          return this.sendJinaResponse(i18n.__("ANORAK_UNDERSTANDING_ERROR"));
+        }
+      });
+  };
 
   handleAvatarClicked(event, url) {
     if (url !== "/avatar_win.png") {
@@ -785,63 +891,6 @@ class Chat extends Component {
           { type: "image", url }
         ]
       }, () => this.state.onAvatarClick());
-    }
-  }
-
-  handleLinkLongPress(link) {
-    this.setState({
-      isLongPressMenuOpen: true,
-      longPressedLink: link
-    });
-  }
-
-  handleLinkClickStop = (enough, link) => {
-    if (!enough) {
-      // For some reason, the click event is fired twice. Here we wait for the second one.
-      this.setState({
-        linkClickCounter: this.state.linkClickCounter + 1
-      }, () => {
-        if (this.state.linkClickCounter >= 2) {
-          this.sendJinaResponse(i18n.__("ANORAK_DID_YOU_FINISH"))
-            .then(() => this.awaitSuggestionChoice([i18n.__("SUGGESTION_YES"), i18n.__("SUGGESTION_NO")]))
-            .then(async (finished) => {
-              if (finished === i18n.__("SUGGESTION_YES")) {
-                await this.sendJinaResponse(i18n.__("ANORAK_CONGRATULATIONS"))
-                  .then(() => Meteor.call("user/awardPoints", link.type, link.categories, (error, summary) => {
-                    this.sendImage("/avatar_win.png")
-                      .then(async () => await this.sendJinaResponse(i18n.__("ANORAK_POINTS_SUMMARY", summary)));
-                  }));
-              } else {
-                await this.sendJinaResponse(i18n.__("ANORAK_SAVE_FOR_LATER"))
-                  .then(() => this.awaitSuggestionChoice([i18n.__("SUGGESTION_YES"), i18n.__("SUGGESTION_NO")]))
-                  .then((saveForLater) => {
-                    if (saveForLater === i18n.__("SUGGESTION_YES")) {
-                      Meteor.call("content/saveForLater", link.id, async (error) => {
-                        await this.sendJinaResponse(i18n.__("ANORAK_SAVED_FOR_LATER"));
-                      });
-                    }
-                  });
-              }
-            })
-            .then(() => this.sendJinaResponse(i18n.__("KEEP_LEARNING"), { extraDelay: 500 }))
-            .then(() => this.awaitSuggestionChoice([
-              i18n.__("SUGGESTION_YES"),
-              i18n.__("SUGGESTION_CALL_IT_A_DAY")
-            ]))
-            .then((choice) => {
-              if (choice.includes(i18n.__("SUGGESTION_YES"))) {
-                return this.getRandomSkill()
-                  .then((skill) => this.displayDiscover(this.state.latestDiscover.type, skill));
-              } else if (choice.includes(i18n.__("SUGGESTION_CALL_IT_A_DAY"))) {
-                return this.sendJinaResponse(i18n.__("BYE"));
-              } else {
-                return this.sendJinaResponse(i18n.__("ANORAK_UNDERSTANDING_ERROR"));
-              }
-            });
-
-          this.setState({ linkClickCounter: 0 });
-        }
-      });
     }
   }
 
@@ -903,14 +952,17 @@ class Chat extends Component {
         onPickingOver={this.handleCategoryPickingOver}
         onSaveForLaterClick={this.handleSaveForLater}
         onReportClick={this.handleReport}
+        onLinkClick={this.handleLinkClick}
         key={"conversation"}
       />,
       <MessageBox
         {...this.props} // Passing history
         message={this.state.typedMessage}
         isRecordingPassword={this.state.isRecordingPassword}
+        isSearchMode={this.state.isSearchMode}
         onSend={this.handleMessageSend}
         onChange={this.handleMessageChange}
+        onSearch={this.handleSearch}
         setMessageInputRef={(node) => { this.messageInput = node }}
         key={"messageBox"}
       />

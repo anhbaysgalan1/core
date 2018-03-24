@@ -69,7 +69,6 @@ class Conversation extends Component {
   };
 
   componentDidUpdate() {
-    console.log("Component update");
     this.autoScroll();
   }
 
@@ -91,11 +90,12 @@ class Conversation extends Component {
       <LinkBubble
         key={`link-${index}`}
         link={link}
+        onLinkClick={() => this.props.onLinkClick(link)}
         onSaveForLaterClick={this.props.onSaveForLaterClick}
         onReportClick={this.props.onReportClick}
       />
     );
-  }
+  };
 
   renderAvatar = (avatar, index, isBot = false) => {
     this.autoScroll();

@@ -78,9 +78,15 @@ const RoundButtonThatIsActuallyADamnButton = styled.button`
   
   transition: all 300ms ease;
   
+  background: #0F90D1;
+  
   img {
     height: 100%;
     background: white;
+  }
+  
+  i {
+    color: white;
   }
 `;
 
@@ -123,7 +129,8 @@ class MessageBox extends Component {
   static propTypes = {
     onSend: PropTypes.func,
     onSuggestionClicked: PropTypes.func,
-    isRecordingPassword: PropTypes.bool
+    isRecordingPassword: PropTypes.bool,
+    isSearchMode: PropTypes.bool
   };
 
   constructor() {
@@ -132,19 +139,35 @@ class MessageBox extends Component {
     this.state = {
       isMoreMenuOpen: false
     };
-
-    this.toggleMoreMenu = this.toggleMoreMenu.bind(this);
   }
 
-  toggleMoreMenu(event) {
+  toggleMoreMenu = (event) => {
     event.preventDefault();
 
     console.log("Toggle more menu");
 
     this.setState({ isMoreMenuOpen: !this.state.isMoreMenuOpen });
-  }
+  };
+
+  handleSearch = (event) => {
+    event.preventDefault();
+
+    console.log(`MessageBox.handleSearch with term ${this.props.message}`, event);
+
+    this.props.onSearch(this.props.message);
+  };
 
   render() {
+    let messageBoxPlaceholder = "MESSAGE_BOX_PLACEHOLDER";
+
+    if (this.props.isRecordingPassword) {
+      messageBoxPlaceholder = "MESSAGE_BOX_PASSWORD_PLACEHOLDER";
+    }
+
+    if (this.props.isSearchMode) {
+      messageBoxPlaceholder = "MESSAGE_BOX_SEARCH_PLACEHOLDER";
+    }
+
     return (
       <MessageBoxAndSuggestions>
         <MoreMenu isOpen={this.state.isMoreMenuOpen}>
@@ -167,7 +190,10 @@ class MessageBox extends Component {
             <img src={`/bug.png`} />
           </RoundButton>
         </MoreMenu>
-        <MessageBoxWrapper innerRef={node => this.form = node} onSubmit={this.props.onSend}>
+        <MessageBoxWrapper
+          innerRef={node => this.form = node}
+          onSubmit={this.props.isSearchMode ? this.handleSearch : this.props.onSend}
+        >
           <RoundButton
             onClick={this.toggleMoreMenu}
             isOpen={this.state.isMoreMenuOpen}
@@ -176,16 +202,16 @@ class MessageBox extends Component {
           </RoundButton>
           <MessageInput
             type={this.props.isRecordingPassword ? `password` : `text`}
-            placeholder={i18n.__(this.props.isRecordingPassword
-              ? "MESSAGE_BOX_PASSWORD_PLACEHOLDER"
-              : "MESSAGE_BOX_PLACEHOLDER")
-            }
+            placeholder={i18n.__(messageBoxPlaceholder)}
             value={this.props.message}
             onChange={this.props.onChange}
             innerRef={node => this.props.setMessageInputRef(node)}
           />
           <RoundButtonThatIsActuallyADamnButton type={"submit"} right>
-            <img src={`/send.svg`} />
+            {this.props.isSearchMode
+              ? <i className={"fa fa-search"} />
+              : <img src={`/send.svg`} />
+            }
           </RoundButtonThatIsActuallyADamnButton>
         </MessageBoxWrapper>
       </MessageBoxAndSuggestions>

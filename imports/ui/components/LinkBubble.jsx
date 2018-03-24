@@ -80,11 +80,14 @@ class LinkBubble extends Component {
   };
 
   render() {
-    const { link } = this.props;
+    const { link, onLinkClick } = this.props;
 
     return (
       <BubbleWrapper sender={"anorak"}>
-        <LinkWrapper href={"#"} onClick={() => window.open(link.link, "_system")}>
+        <LinkWrapper href={"#"} onClick={() => {
+          onLinkClick();
+          window.open(link.link, "_system");
+        }}>
           <Bubble
             sender={"me"}
             suggestion
