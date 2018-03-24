@@ -1,11 +1,10 @@
 import { Meteor } from "meteor/meteor";
 import i18n from "meteor/universe:i18n";
-import { analytics } from "meteor/okgrow:analytics";
 
 import React, { Component } from "react";
 import { compose } from "react-komposer";
 
-import { Conversation, MessageBox, Header } from "../components";
+import { Conversation, MessageBox } from "../components";
 import { getCategoryBySlug } from "/imports/api/Category";
 import { SavedForLater } from "/imports/api/SavedForLater";
 
@@ -443,11 +442,13 @@ class Chat extends Component {
         xp: 0,
         tokens: 0
       }
-    }, (err) => {
+    }, async (err) => {
       if (err) {
         this.sendJinaResponse(i18n.__("JINA_ERROR_SOMETHING_WENT_WRONG", { err }));
       } else {
         if (Meteor.isProduction) {
+          const { analytics } = await import("meteor/okgrow:analytics");
+
           analytics.identify(Meteor.userId(), {
             email: Meteor.user().emails[0].address,
             name: Meteor.user().username
@@ -779,12 +780,14 @@ class Chat extends Component {
 
           console.log("password", password);
 
-          Meteor.loginWithPassword(this.state.userName, password, (err) => {
+          Meteor.loginWithPassword(this.state.userName, password, async (err) => {
             if (err) {
               this.sendJinaResponse(i18n.__("JINA_ERROR_SOMETHING_WENT_WRONG", { err }))
                 .then(() => this.getPassword(oldResolve ? oldResolve : resolve));
             } else {
               if (Meteor.isProduction) {
+                const { analytics } = await import("meteor/okgrow:analytics");
+
                 analytics.identify(Meteor.userId(), {
                   email: Meteor.user().emails[0].address,
                   name: Meteor.user().username
