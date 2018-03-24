@@ -1,6 +1,7 @@
 {
   "MESSAGE_BOX_PLACEHOLDER": "Message",
   "MESSAGE_BOX_PASSWORD_PLACEHOLDER": "Password",
+  "MESSAGE_BOX_SEARCH_PLACEHOLDER": "Search",
   "SUGGESTION_I_AM_MEMBER": "Yes",
   "SUGGESTION_I_AM_NEWCOMER": "No",
   "STUDENT": "yes",
@@ -81,5 +82,7 @@
   "KEEP_LEARNING": "Do you want to keep learning?",
   "SUGGESTION_CALL_IT_A_DAY": "Let's call it a day",
   "BYE": "Until next time!",
-  "ANORAK_REGISTRATION_CATEGORY_PICK": "Here are some of the learning categories I have, go ahead and pick at least three!"
+  "ANORAK_REGISTRATION_CATEGORY_PICK": "Here are some of the learning categories I have, go ahead and pick at least three!",
+  "GET_BACK_TO_DISCOVER": "Get back to discover",
+  "BEFORE_SHOWING_SEARCH_RESULTS": "Here's what I found for {$term}:"
 }
