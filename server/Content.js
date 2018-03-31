@@ -94,5 +94,17 @@ Meteor.methods({
     console.log(`Searched for ${term} with results`, results);
 
     return results;
+  },
+
+  "content/like": (content) => {
+    check(content, Object);
+
+    console.log("Like", content);
+  },
+
+  "content/dislike": (content) => {
+    check(content, Object);
+
+    console.log("Dislike", content);
   }
 });
