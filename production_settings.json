@@ -19,6 +19,9 @@
       "Mixpanel": {
         "token": "8d573875f1792a6e1111e32e896e8815",
         "people": true
+      },
+      "Google Analytics": {
+        "trackingId": "UA-113462458-2"
       }
     }
   }

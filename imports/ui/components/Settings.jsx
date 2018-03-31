@@ -2,19 +2,7 @@ import React, { Component } from "react";
 import styled from "styled-components";
 import CategoryCarousel from "./CategoryCarousel";
 import countries from "country-list";
-
-const WarningWrapper = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  
-  height: ${props => props.loggedIn ? "40vh" : "80vh"};
-`;
-
-const Warning = styled.h2`
-  font-size: 1.4rem;
-  text-align: center;
-`;
+import { WarningWrapper, Warning } from "./Warning";
 
 const Wrapper = styled.div`
   width: 100%;

@@ -1,6 +1,7 @@
 import React from "react";
 import styled from "styled-components";
 import { Meteor } from "meteor/meteor";
+import { WarningWrapper, Warning} from "./Warning";
 
 const NavigationRow = styled.div`
   display: flex;
@@ -96,19 +97,6 @@ const NavigationTitle = styled.h2`
   margin: 0;
 `;
 
-const WarningWrapper = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  
-  height: ${props => props.loggedIn ? "40vh" : "80vh"};
-`;
-
-const Warning = styled.h2`
-  font-size: 1.4rem;
-  text-align: center;
-`;
-
 const SavedForLater = ({ content, history, onDelete }) => (
   Meteor.user() ?
   <Wrapper>
@@ -116,22 +104,28 @@ const SavedForLater = ({ content, history, onDelete }) => (
       <BackButton onClick={() => history.push("/")}><i className={"fa fa-chevron-left"} /></BackButton>
       <NavigationTitle>Saved courses</NavigationTitle>
     </NavigationRow>
-    {content.map((currentContent, index) => (
-      <ContentRow key={index}>
-        <Link href={"#"} onClick={() => window.open(currentContent.link, "_system")}>
-          <div>
-            <Community>{currentContent.community}</Community>
-            <Title>{currentContent.title}</Title>
-          </div>
-          <div>
-            <Thumbnail src={currentContent.image || "http://via.placeholder.com/150x100"} />
-          </div>
-        </Link>
-        <TrashButton onClick={() => onDelete(currentContent, index)}>
-          <i className="fa fa-trash-o" />
-        </TrashButton>
-      </ContentRow>
-    ))}
+    {content.length > 0 ?
+      content.map((currentContent, index) => (
+        <ContentRow key={index}>
+          <Link href={"#"} onClick={() => window.open(currentContent.link, "_system")}>
+            <div>
+              <Community>{currentContent.community}</Community>
+              <Title>{currentContent.title}</Title>
+            </div>
+            <div>
+              <Thumbnail src={currentContent.image || "http://via.placeholder.com/150x100"} />
+            </div>
+          </Link>
+          <TrashButton onClick={() => onDelete(currentContent, index)}>
+            <i className="fa fa-trash-o" />
+          </TrashButton>
+        </ContentRow>
+      ))
+      :
+      <WarningWrapper loggedIn>
+        <Warning>You haven't saved anything yet. :(</Warning>
+      </WarningWrapper>
+    }
   </Wrapper>
   :
   <WarningWrapper>
