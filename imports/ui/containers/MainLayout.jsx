@@ -8,6 +8,7 @@ import Header from "../components/Header";
 import Profile from "./Profile";
 import Chat from "./Chat";
 import SavedForLater from "./SavedForLater";
+import Settings from "./SettingsContainer";
 import About from '../pages/About.jsx';
 import NotFound from '../pages/NotFound.jsx';
 
@@ -35,6 +36,7 @@ export default class MainLayout extends React.Component {
               <Route path='/profile' component={Profile} />
               <Route path='/about' component={About} />
               <Route path='/savedForLater' component={SavedForLater} />
+              <Route path='/settings' component={Settings} />
               <Route component={NotFound} />
             </Switch>
           </main>

@@ -115,5 +115,25 @@ Meteor.methods({
         eventMessage
       ]))
       .then(() => connection.end());
+  },
+
+  "user/replaceEmail": async (email) => {
+    check(email, String);
+
+    const { Accounts } = await import("meteor/accounts-base");
+
+    const oldEmail = Meteor.user().emails[0].address;
+
+    Accounts.addEmail(Meteor.userId(), email);
+
+    Accounts.removeEmail(Meteor.userId(), oldEmail);
+  },
+
+  "user/deleteAccount": (userId) => {
+    check(userId, String);
+
+    if (userId === Meteor.userId()) {
+      Meteor.users.remove(userId);
+    }
   }
 });

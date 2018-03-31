@@ -50,12 +50,14 @@ class Header extends Component {
   render() {
     const { location } = this.props;
 
-    let currentPane = "chat";
+    let currentPane = "";
 
     if (location.pathname === "/profile") {
       currentPane = "profile";
     } else if (location.pathname === "/savedForLater") {
       currentPane = "saved";
+    } else if (location.pathname === "/") {
+      currentPane = "chat";
     }
 
     return (

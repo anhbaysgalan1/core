@@ -54,6 +54,9 @@ const RoundButton = styled.a`
   
   transition: all 300ms ease;
   
+  color: white;
+  text-decoration: none;
+  
   img {
     height: 100%;
   }
@@ -171,6 +174,12 @@ class MessageBox extends Component {
     return (
       <MessageBoxAndSuggestions>
         <MoreMenu isOpen={this.state.isMoreMenuOpen}>
+          <RoundButton
+            href={"#"}
+            onClick={() => this.props.history.push("/settings")}
+          >
+            <i className="fa fa-cogs" />
+          </RoundButton>
           <RoundButton
             href={"#"}
             onClick={() => window.open("https://undermind.typeform.com/to/DxEfih", "_system")}

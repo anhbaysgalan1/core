@@ -112,7 +112,7 @@ const CategoryCarousel = ({ categories, checkedCategories, onCategoryClick }) =>
           </CategoryWrapper>
         ))}
       </Slider>
-      <span>{checkedCategories.length < 6 ? `${6 - checkedCategories.length} categories to go!` : `Well done.`}</span>
+      <span className="category-counter">{checkedCategories.length < 6 ? `${6 - checkedCategories.length} categories to go!` : `Well done.`}</span>
     </div>
   );
 };
