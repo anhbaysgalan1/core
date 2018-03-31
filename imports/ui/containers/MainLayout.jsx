@@ -1,5 +1,5 @@
-import React from 'react';
-import { BrowserRouter as Router, Route, Switch } from 'react-router-dom'
+import React from "react";
+import { BrowserRouter as Router, Route, Switch } from "react-router-dom"
 import i18n from "meteor/universe:i18n";
 
 import "normalize.css";
@@ -9,8 +9,7 @@ import Profile from "./Profile";
 import Chat from "./Chat";
 import SavedForLater from "./SavedForLater";
 import Settings from "./SettingsContainer";
-import About from '../pages/About.jsx';
-import NotFound from '../pages/NotFound.jsx';
+import NotFound from "../pages/NotFound.jsx";
 
 function getLang () {
   return (
@@ -18,7 +17,7 @@ function getLang () {
     // navigator.language ||
     // navigator.browserLanguage ||
     // navigator.userLanguage ||
-    'en-US'
+    "en-US"
   );
 }
 
@@ -32,12 +31,11 @@ export default class MainLayout extends React.Component {
           <Header />
           <main>
             <Switch>
-              <Route exact path='/' component={Chat} />
-              <Route path='/profile' component={Profile} />
-              <Route path='/about' component={About} />
-              <Route path='/savedForLater' component={SavedForLater} />
-              <Route path='/settings' component={Settings} />
-              <Route component={NotFound} />
+              <Route exact path="/" name="Chat" component={Chat} />
+              <Route path="/profile" name="Profile" component={Profile} />
+              <Route path="/savedForLater" name="Saved for later" component={SavedForLater} />
+              <Route path="/settings" name="Settings" component={Settings} />
+              <Route name="404 Not Found" component={NotFound} />
             </Switch>
           </main>
         </div>
