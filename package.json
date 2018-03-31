@@ -18,6 +18,7 @@
   "homepage": "https://github.com/AdamBrodzinski/meteor-react-boilerplate",
   "dependencies": {
     "@babel/runtime": "^7.0.0-beta.40",
+    "@okgrow/auto-analytics": "^2.0.0",
     "analytics-node": "^3.2.0",
     "classnames": "^2.2.5",
     "core-js": "^2.5.3",
@@ -31,6 +32,7 @@
     "mysql": "^2.15.0",
     "normalize.css": "^7.0.0",
     "promise-mysql": "^3.2.0",
+    "props": "^0.3.0",
     "react": "^16.0.0",
     "react-dom": "^16.0.0",
     "react-komposer": "^2.0.0",
@@ -41,6 +43,7 @@
     "react-truncate": "^2.3.0",
     "slick-carousel": "^1.8.1",
     "slugify": "^1.2.9",
-    "styled-components": "^2.2.1"
+    "styled-components": "^2.2.1",
+    "type": "0.0.3"
   }
 }

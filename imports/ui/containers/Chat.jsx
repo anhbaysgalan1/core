@@ -1,5 +1,6 @@
 import { Meteor } from "meteor/meteor";
 import i18n from "meteor/universe:i18n";
+import { analytics } from "meteor/okgrow:analytics";
 
 import React, { Component } from "react";
 import { compose } from "react-komposer";
@@ -207,6 +208,13 @@ class Chat extends Component {
           if (filteredContent.length < 1) {
             return this.getRandomSkill().then((nextSkill) => this.displayDiscover(type, nextSkill));
           } else {
+            if (Meteor.isProduction) {
+              analytics.track("Display discover program", {
+                category: skill,
+                contentType: type
+              });
+            }
+
             this.setState({
               latestDiscover: {
                 skill,
@@ -442,13 +450,11 @@ class Chat extends Component {
         xp: 0,
         tokens: 0
       }
-    }, async (err) => {
+    }, (err) => {
       if (err) {
         this.sendBotResponse(i18n.__("BOT_ERROR_SOMETHING_WENT_WRONG", { err }));
       } else {
         if (Meteor.isProduction) {
-          const { analytics } = await import("meteor/okgrow:analytics");
-
           analytics.identify(Meteor.userId(), {
             email: Meteor.user().emails[0].address,
             name: Meteor.user().username
@@ -491,9 +497,22 @@ class Chat extends Component {
     return Meteor.callPromise("content/search", term)
       .then((result) => {
         if (result.length < 1) {
+          if (Meteor.isProduction) {
+            analytics.track("Search", {
+              term,
+              noResult: true
+            });
+          }
+
           this.sendBotResponse(i18n.__("SEARCH_NO_RESULT"), { noDelay: true });
         } else {
           this.sendBotResponse(i18n.__("BEFORE_SHOWING_SEARCH_RESULTS", { term }));
+
+          if (Meteor.isProduction) {
+            analytics.track("Search", {
+              term
+            });
+          }
         }
 
         return result;
@@ -786,14 +805,12 @@ class Chat extends Component {
 
           console.log("password", password);
 
-          Meteor.loginWithPassword(this.state.userName, password, async (err) => {
+          Meteor.loginWithPassword(this.state.userName, password, (err) => {
             if (err) {
               this.sendBotResponse(i18n.__("BOT_ERROR_SOMETHING_WENT_WRONG", { err }))
                 .then(() => this.getPassword(oldResolve ? oldResolve : resolve));
             } else {
               if (Meteor.isProduction) {
-                const { analytics } = await import("meteor/okgrow:analytics");
-
                 analytics.identify(Meteor.userId(), {
                   email: Meteor.user().emails[0].address,
                   name: Meteor.user().username
