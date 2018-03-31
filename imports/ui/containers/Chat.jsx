@@ -258,7 +258,7 @@ class Chat extends Component {
   });
 
   checkIfUserQuotaNotOver = () => new Promise((resolve, reject) => {
-    if (Meteor.users.find().count() > 100) {
+    if (Meteor.users.find().count() > 1000) {
       this.sendBotResponse(i18n.__("BOT_USER_QUOTA_REACHED"))
         .then(() => this.sendBotResponse(i18n.__("BOT_USER_QUOTA_EMAIL_CTA")))
         .then(() => this.setState({
