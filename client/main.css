@@ -19,3 +19,19 @@ body {
   height: 100vh;
   width: 100vw;
 }
+
+@media (min-width: 636px) {
+  #app {
+    width: 500px;
+    height: 80vh;
+    position: relative;
+    left: 50%;
+    top: 10vh;
+    transform: translateX(-50%);
+    background: white;
+  }
+
+  body {
+    background: #eee;
+  }
+}

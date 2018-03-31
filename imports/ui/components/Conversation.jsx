@@ -26,6 +26,12 @@ const ConversationWrapper = styled.section`
   padding: 7rem .8rem 0rem .8rem;
   
   overflow-y: scroll;
+  
+  
+  @media (min-width: 636px) {
+    width: 500px;
+    max-height: 72vh;
+  }
 `;
 
 const BotIsTyping = styled.p`

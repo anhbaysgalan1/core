@@ -86,6 +86,7 @@ const CategoryCarousel = ({ categories, checkedCategories, onCategoryClick }) =>
   const settings = {
     dots: false,
     slidesToShow: 3,
+    slidesToScroll: 2,
     swipeToSlide: true,
     arrows: true,
     prevArrow: <PrevArrow />,

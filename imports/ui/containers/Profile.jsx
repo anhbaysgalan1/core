@@ -1,23 +1,9 @@
 import React, { Component } from "react";
 import { Meteor } from "meteor/meteor";
-import styled from "styled-components";
 import { compose } from "react-komposer";
 
-import { getAllCategories } from "../../api/Category";
-import { Header, UserProfile, UserSubjects, LeaderboardNavigation } from "../components";
-
-const WarningWrapper = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  
-  height: ${props => props.loggedIn ? "40vh" : "80vh"};
-`;
-
-const Warning = styled.h2`
-  font-size: 1.4rem;
-  text-align: center;
-`;
+import { UserProfile, UserSubjects, LeaderboardNavigation } from "../components";
+import { WarningWrapper, Warning } from "../components/Warning";
 
 class Profile extends Component {
   constructor() {

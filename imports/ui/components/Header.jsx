@@ -15,6 +15,10 @@ const HeaderWrapper = styled.div`
   z-index: 9;
   width: 100%;
   
+  @media (min-width: 636px) {
+    width: 500px;
+  }
+  
   background: white;
 `;
 

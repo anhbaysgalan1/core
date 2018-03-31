@@ -8,6 +8,10 @@ const MessageBoxAndSuggestions = styled.div`
   bottom: 0;
   
   width: 100%;
+  
+  @media (min-width: 636px) {
+    width: 500px;
+  }
 `;
 
 const MessageBoxWrapper = styled.form`
