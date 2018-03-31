@@ -1,5 +1,6 @@
 import React from "react";
 import styled from "styled-components";
+import { Meteor } from "meteor/meteor";
 
 const NavigationRow = styled.div`
   display: flex;
@@ -95,7 +96,21 @@ const NavigationTitle = styled.h2`
   margin: 0;
 `;
 
+const WarningWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  height: ${props => props.loggedIn ? "40vh" : "80vh"};
+`;
+
+const Warning = styled.h2`
+  font-size: 1.4rem;
+  text-align: center;
+`;
+
 const SavedForLater = ({ content, history, onDelete }) => (
+  Meteor.user() ?
   <Wrapper>
     <NavigationRow>
       <BackButton onClick={() => history.push("/")}><i className={"fa fa-chevron-left"} /></BackButton>
@@ -118,6 +133,10 @@ const SavedForLater = ({ content, history, onDelete }) => (
       </ContentRow>
     ))}
   </Wrapper>
+  :
+  <WarningWrapper>
+    <Warning>Register or log in to see your saved content!</Warning>
+  </WarningWrapper>
 );
 
 export default SavedForLater;

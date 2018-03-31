@@ -27,12 +27,6 @@ class SavedForLater extends Component {
   }
 
   render() {
-    console.log("State:", this.state);
-    console.log("Props:", this.props);
-
-    console.log("Got content", this.state.content);
-    console.log("Mapping content", this.state.content.map((current) => current.link));
-
     return (
       <SavedForLaterComponent
         {...this.props}
