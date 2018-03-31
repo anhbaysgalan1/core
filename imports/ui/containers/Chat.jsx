@@ -14,7 +14,7 @@ class Chat extends Component {
 
     this.state = {
       conversation: [
-        { sender: "jina", text: i18n.__("JINA_GREETING") }
+        { sender: "jina", text: i18n.__("BOT_GREETING") }
       ],
       suggestions: [i18n.__("SUGGESTION_I_AM_MEMBER"), i18n.__("SUGGESTION_I_AM_NEWCOMER")],
       typedMessage: "",
@@ -105,7 +105,7 @@ class Chat extends Component {
     const partOfDay = await import("humanized-part-of-day");
 
     // Greet user
-    this.sendJinaResponse(i18n.__(`JINA_WELCOME_${partOfDay.getCurrent()}`, { name: Meteor.user().username }))
+    this.sendBotResponse(i18n.__(`BOT_WELCOME_${partOfDay.getCurrent()}`, { name: Meteor.user().username }))
       .then(() => {
         this.showBriefing();
       });
@@ -134,13 +134,13 @@ class Chat extends Component {
       const unlockTime = new Date();
       unlockTime.setTime(Meteor._localStorage.getItem("contentOverUntil"));
 
-      this.sendJinaResponse(i18n.__("CONTENT_OVER_PRECISE", {
+      this.sendBotResponse(i18n.__("CONTENT_OVER_PRECISE", {
         time: `${unlockTime.getHours()}:${unlockTime.getMinutes()}:${unlockTime.getSeconds()}`
       }));
     } else {
       this.setState({ isSearchMode: true });
 
-      this.sendJinaResponse(i18n.__("ANORAK_BRIEFING_INTRO"))
+      this.sendBotResponse(i18n.__("BOT_BRIEFING_INTRO"))
         .then(() => this.awaitSuggestionChoice([
           i18n.__("SUGGESTION_COURSE"),
           i18n.__("SUGGESTION_VIDEO"),
@@ -161,7 +161,7 @@ class Chat extends Component {
               } else if (message.includes(i18n.__("LECTURE"))) {
                 this.displayDiscover("lecture", skill);
               } else {
-                this.sendJinaResponse(i18n.__("ANORAK_UNDERSTANDING_ERROR"));
+                this.sendBotResponse(i18n.__("BOT_UNDERSTANDING_ERROR"));
               }
             });
         });
@@ -182,7 +182,7 @@ class Chat extends Component {
 
     if (Meteor._localStorage.getItem("contentOverUntil") &&
       parseInt(Meteor._localStorage.getItem("contentOverUntil")) > new Date().getTime()) {
-      this.sendJinaResponse(i18n.__("CONTENT_OVER"))
+      this.sendBotResponse(i18n.__("CONTENT_OVER"))
     } else {
       Meteor.callPromise("content/getRandomFromCategory", type, skill.split(" ")[0])
         .then((content) => {
@@ -216,7 +216,7 @@ class Chat extends Component {
 
             console.log("BEFORE_SHOWING_CONTENT skill", skill);
 
-            this.sendJinaResponse(i18n.__("BEFORE_SHOWING_CONTENT", { skill }), { noDelay: true });
+            this.sendBotResponse(i18n.__("BEFORE_SHOWING_CONTENT", { skill }), { noDelay: true });
           }
 
           filteredContent.push(i18n.__("CONTINUE_DISCOVER_PROGRAM"));
@@ -251,8 +251,8 @@ class Chat extends Component {
 
   checkIfUserQuotaNotOver = () => new Promise((resolve, reject) => {
     if (Meteor.users.find().count() > 100) {
-      this.sendJinaResponse(i18n.__("JINA_USER_QUOTA_REACHED"))
-        .then(() => this.sendJinaResponse(i18n.__("JINA_USER_QUOTA_EMAIL_CTA")))
+      this.sendBotResponse(i18n.__("BOT_USER_QUOTA_REACHED"))
+        .then(() => this.sendBotResponse(i18n.__("BOT_USER_QUOTA_EMAIL_CTA")))
         .then(() => this.setState({
           quotaCtaEmailCapture: true,
           suggestions: [i18n.__("SUGGESTION_EMAIL_CTA_YES"), i18n.__("SUGGESTION_EMAIL_CTA_NO")]
@@ -263,8 +263,8 @@ class Chat extends Component {
   });
 
   agreeToPrivacyPolicy = () => new Promise((resolve, reject) => {
-    this.sendJinaResponse(i18n.__("JINA_REGISTRATION_GREETING"))
-      .then(() => this.sendJinaResponse(i18n.__("JINA_REGISTRATION_GREETING_2")))
+    this.sendBotResponse(i18n.__("BOT_REGISTRATION_GREETING"))
+      .then(() => this.sendBotResponse(i18n.__("BOT_REGISTRATION_GREETING_2")))
       .then(() => this.awaitSuggestionChoice([
         i18n.__("SUGGESTION_REGISTRATION_PRIVACY_YES"),
         i18n.__("SUGGESTION_REGISTRATION_PRIVACY_NO")
@@ -277,7 +277,7 @@ class Chat extends Component {
   });
 
   pickUsername = (isRetry = false, oldResolve = null) => new Promise((resolve, reject) => {
-    this.sendJinaResponse(i18n.__(isRetry ? "ANORAK_REGISTRATION_USERNAME_TAKEN" : "ANORAK_REGISTRATION_PICK_USERNAME", {
+    this.sendBotResponse(i18n.__(isRetry ? "BOT_REGISTRATION_USERNAME_TAKEN" : "BOT_REGISTRATION_PICK_USERNAME", {
       userName: this.state.lastMessage
     }))
       .then(this.awaitReply)
@@ -300,7 +300,7 @@ class Chat extends Component {
   });
 
   pickEmail = () => new Promise((resolve, reject) => {
-    this.sendJinaResponse(i18n.__("ANORAK_REGISTRATION_PICK_EMAIL", {
+    this.sendBotResponse(i18n.__("BOT_REGISTRATION_PICK_EMAIL", {
       userName: this.state.userName
     }))
       .then(this.awaitReply)
@@ -312,7 +312,7 @@ class Chat extends Component {
   });
 
   pickGender = () => new Promise((resolve, reject) => {
-    this.sendJinaResponse(i18n.__("ANORAK_REGISTRATION_PICK_GENDER"))
+    this.sendBotResponse(i18n.__("BOT_REGISTRATION_PICK_GENDER"))
       .then(() => this.awaitSuggestionChoice([
         i18n.__("SUGGESTION_GENDER_MALE"),
         i18n.__("SUGGESTION_GENDER_FEMALE")
@@ -327,7 +327,7 @@ class Chat extends Component {
   });
 
   pickAvatar = () => new Promise((resolve, reject) => {
-    this.sendJinaResponse(i18n.__("ANORAK_REGISTRATION_PICK_AVATAR"))
+    this.sendBotResponse(i18n.__("BOT_REGISTRATION_PICK_AVATAR"))
       .then(() => this.displayAvatars(resolve)); // Resolve handler is called when user chooses avatar
   });
 
@@ -338,23 +338,23 @@ class Chat extends Component {
 
     switch (reason) {
       case "LENGTH":
-        message = "ANORAK_REGISTRATION_PASSWORD_LENGTH_ERROR";
+        message = "BOT_REGISTRATION_PASSWORD_LENGTH_ERROR";
         break;
 
       case "CAPITAL":
-        message = "ANORAK_REGISTRATION_PASSWORD_CAPITAL_ERROR";
+        message = "BOT_REGISTRATION_PASSWORD_CAPITAL_ERROR";
         break;
 
       case "NUMBER":
-        message = "ANORAK_REGISTRATION_PASSWORD_NUMBER_ERROR";
+        message = "BOT_REGISTRATION_PASSWORD_NUMBER_ERROR";
         break;
 
       case "CONFIRM":
-        message = "ANORAK_REGISTRATION_PASSWORD_CONFIRM";
+        message = "BOT_REGISTRATION_PASSWORD_CONFIRM";
         break;
 
       case "NO_MATCH":
-        message = "ANORAK_REGISTRATION_PASSWORD_CONFIRM_NO_MATCH";
+        message = "BOT_REGISTRATION_PASSWORD_CONFIRM_NO_MATCH";
         break;
 
       default:
@@ -362,7 +362,7 @@ class Chat extends Component {
         break;
     }
 
-    return this.sendJinaResponse(i18n.__(message, { userName: this.state.userName }))
+    return this.sendBotResponse(i18n.__(message, { userName: this.state.userName }))
       .then(() => this.setState({ isRecordingPassword: true }))
       .then(this.awaitReply)
       .then(() => {
@@ -394,22 +394,22 @@ class Chat extends Component {
   });
 
   pickAge = () => new Promise((resolve, reject) => {
-    this.sendJinaResponse(i18n.__("ANORAK_REGISTRATION_AGE_CHECK"))
+    this.sendBotResponse(i18n.__("BOT_REGISTRATION_AGE_CHECK"))
       .then(() => this.awaitReply())
       .then((choice) => {
         this.setState({ onReply: null });
 
         if (parseInt(choice) <= 13) {
-          this.sendJinaResponse(i18n.__("ANORAK_REGISTRATION_TOO_YOUNG"));
+          this.sendBotResponse(i18n.__("BOT_REGISTRATION_TOO_YOUNG"));
         } else {
-          this.sendJinaResponse(i18n.__("ANORAK_REGISTRATION_AGE_OK"))
+          this.sendBotResponse(i18n.__("BOT_REGISTRATION_AGE_OK"))
             .then(resolve);
         }
       });
   });
 
   agreeTermsAndConditions = () => new Promise((resolve, reject) => {
-    this.sendJinaResponse(i18n.__("ANORAK_REGISTRATION_AGREE_TOC", {
+    this.sendBotResponse(i18n.__("BOT_REGISTRATION_AGREE_TOC", {
       userName: this.state.userName
     }), {
       link: "https://undermind.typeform.com/to/BJumJz"
@@ -424,7 +424,7 @@ class Chat extends Component {
         if (choice.includes(i18n.__("SUGGESTION_AGREE"))) {
           resolve();
         } else {
-          this.sendJinaResponse(i18n.__("ANORAK_REGISTRATION_TOC_NOT_AGREE"));
+          this.sendBotResponse(i18n.__("BOT_REGISTRATION_TOC_NOT_AGREE"));
         }
       });
   });
@@ -444,7 +444,7 @@ class Chat extends Component {
       }
     }, async (err) => {
       if (err) {
-        this.sendJinaResponse(i18n.__("JINA_ERROR_SOMETHING_WENT_WRONG", { err }));
+        this.sendBotResponse(i18n.__("BOT_ERROR_SOMETHING_WENT_WRONG", { err }));
       } else {
         if (Meteor.isProduction) {
           const { analytics } = await import("meteor/okgrow:analytics");
@@ -461,15 +461,15 @@ class Chat extends Component {
   });
 
   pickCategories = () => new Promise((resolve, reject) => {
-    this.sendJinaResponse(i18n.__("ANORAK_REGISTRATION_CATEGORY_PICK"))
+    this.sendBotResponse(i18n.__("BOT_REGISTRATION_CATEGORY_PICK"))
       .then(this.awaitCategoryPicking)
       .then(resolve);
   });
 
   greetNewUser = () => {
-    this.sendJinaResponse(i18n.__("ANORAK_REGISTRATION_WELCOME_1"))
-      .then(() => this.sendJinaResponse(i18n.__("ANORAK_REGISTRATION_WELCOME_2")))
-      .then(() =>  this.sendJinaResponse(i18n.__("ANORAK_REGISTRATION_WELCOME_3")))
+    this.sendBotResponse(i18n.__("BOT_REGISTRATION_WELCOME_1"))
+      .then(() => this.sendBotResponse(i18n.__("BOT_REGISTRATION_WELCOME_2")))
+      .then(() =>  this.sendBotResponse(i18n.__("BOT_REGISTRATION_WELCOME_3")))
       .then(() => this.awaitSuggestionChoice([i18n.__("SUGGESTION_I_M_READY")]))
       .then(this.greet);
   };
@@ -488,11 +488,17 @@ class Chat extends Component {
       latestDiscover: null
     });
 
-    return this.sendJinaResponse(i18n.__("BEFORE_SHOWING_SEARCH_RESULTS", { term }))
-      .then(() => Meteor.callPromise("content/search", term))
+    return Meteor.callPromise("content/search", term)
       .then((result) => {
-        console.log("Got result:", result);
+        if (result.length < 1) {
+          this.sendBotResponse(i18n.__("SEARCH_NO_RESULT"), { noDelay: true });
+        } else {
+          this.sendBotResponse(i18n.__("BEFORE_SHOWING_SEARCH_RESULTS", { term }));
+        }
 
+        return result;
+      })
+      .then((result) => {
         const filteredContent = result.map((row) => ({
           id: row.row_id,
           type: row.material_type,
@@ -504,13 +510,13 @@ class Chat extends Component {
           isSavedForLater: SavedForLater.findOne({ content: row.row_id })
         }));
 
-        filteredContent.push(i18n.__("CONTINUE_DISCOVER_PROGRAM"));
+        if (result.length > 0) {
+          filteredContent.push(i18n.__("CONTINUE_DISCOVER_PROGRAM"));
+        }
+
         filteredContent.push(i18n.__("START_OVER"));
 
         return this.awaitSuggestionChoice(filteredContent);
-      })
-      .then((choice) => {
-        console.log("Choice", choice);
       });
   };
 
@@ -628,15 +634,15 @@ class Chat extends Component {
 
     // If user asks for privacy policy
     if (this.state.privacyPolicyCapture && typedMessage.includes(i18n.__("SUGGESTION_REGISTRATION_PRIVACY_NO"))) {
-      this.sendJinaResponse(i18n.__("JINA_REGISTRATION_PRIVACY_POLICY"))
-        .then(() => this.sendJinaResponse(i18n.__("JINA_REGISTRATION_PRIVACY_POLICY_COME_BACK")))
+      this.sendBotResponse(i18n.__("BOT_REGISTRATION_PRIVACY_POLICY"))
+        .then(() => this.sendBotResponse(i18n.__("BOT_REGISTRATION_PRIVACY_POLICY_COME_BACK")))
         .then(() => this.setState({
           suggestions: [i18n.__("SUGGESTION_PRIVACY_POLICY_TRUST"), i18n.__("SUGGESTION_PRIVACY_POLICY_NO_TRUST")]
         }));
     }
     // If user doesn't agree to privacy policy
     else if (this.state.privacyPolicyCapture && typedMessage.includes(i18n.__("SUGGESTION_PRIVACY_POLICY_NO_TRUST"))) {
-      this.sendJinaResponse(i18n.__("JINA_USER_QUOTE_BYE"));
+      this.sendBotResponse(i18n.__("BOT_USER_QUOTE_BYE"));
 
       this.setState({
         suggestions: []
@@ -673,13 +679,13 @@ class Chat extends Component {
   }
 
   /**
-   * Send response from Jina
+   * Send response from Bot
    *
    * @param message
    * @param options : Object (optional)
    */
 
-  sendJinaResponse = (message, options = {}) => new Promise(async (resolve, reject) => {
+  sendBotResponse = (message, options = {}) => new Promise(async (resolve, reject) => {
     this.setState({
       isTyping: true,
       onReply: null,
@@ -717,13 +723,13 @@ class Chat extends Component {
   });
 
   getUsername = (oldResolve = null) => new Promise((resolve, reject) => {
-    let message = "JINA_LOGIN_USERNAME_PROMPT";
+    let message = "BOT_LOGIN_USERNAME_PROMPT";
 
     if (oldResolve) {
-      message = "JINA_ERROR_USER_NOT_FOUND";
+      message = "BOT_ERROR_USER_NOT_FOUND";
     }
 
-    this.sendJinaResponse(i18n.__(message))
+    this.sendBotResponse(i18n.__(message))
       .then(this.awaitReply)
       .then((username) => {
         this.setState({ onReply: null });
@@ -755,22 +761,22 @@ class Chat extends Component {
   getPassword = (oldResolve = null) => new Promise(async (resolve, reject) => {
     this.setState({ badPasswordAttempts: 0 });
 
-    let message = "JINA_LOGIN_PASSWORD_PROMPT";
+    let message = "BOT_LOGIN_PASSWORD_PROMPT";
 
     if (oldResolve) {
       this.setState({ badPasswordAttempts: this.state.badPasswordAttempts + 1 });
 
-      message = "JINA_ERROR_PASSWORD_TRY_AGAIN";
+      message = "BOT_ERROR_PASSWORD_TRY_AGAIN";
     }
 
     if (this.state.badPasswordAttempts >= 3) {
-      this.sendJinaResponse(i18n.__("JINA_ERROR_PASSWORD_FORGOTTEN"));
+      this.sendBotResponse(i18n.__("BOT_ERROR_PASSWORD_FORGOTTEN"));
 
       const { Accounts } = await import("meteor/accounts-base");
 
       Meteor.sendResetPasswordEmail(Accounts.findUserByUsername(this.state.userName));
     } else {
-      this.sendJinaResponse(i18n.__(message, { userName: this.state.userName }))
+      this.sendBotResponse(i18n.__(message, { userName: this.state.userName }))
         .then(() => this.setState({ isRecordingPassword: true }))
         .then(this.awaitReply)
         .then(() => {
@@ -782,7 +788,7 @@ class Chat extends Component {
 
           Meteor.loginWithPassword(this.state.userName, password, async (err) => {
             if (err) {
-              this.sendJinaResponse(i18n.__("JINA_ERROR_SOMETHING_WENT_WRONG", { err }))
+              this.sendBotResponse(i18n.__("BOT_ERROR_SOMETHING_WENT_WRONG", { err }))
                 .then(() => this.getPassword(oldResolve ? oldResolve : resolve));
             } else {
               if (Meteor.isProduction) {
@@ -859,28 +865,28 @@ class Chat extends Component {
       eventMessage: this.state.latestDiscover.type
     });
 
-    this.sendJinaResponse(i18n.__("ANORAK_DID_YOU_FINISH"))
+    this.sendBotResponse(i18n.__("BOT_DID_YOU_FINISH"))
       .then(() => this.awaitSuggestionChoice([i18n.__("SUGGESTION_YES"), i18n.__("SUGGESTION_NO")]))
       .then(async (finished) => {
         if (finished === i18n.__("SUGGESTION_YES")) {
-          await this.sendJinaResponse(i18n.__("ANORAK_CONGRATULATIONS"))
+          await this.sendBotResponse(i18n.__("BOT_CONGRATULATIONS"))
             .then(() => Meteor.call("user/awardPoints", link.type, link.categories, (error, summary) => {
               this.sendImage("/avatar_win.png")
-                .then(async () => await this.sendJinaResponse(i18n.__("ANORAK_POINTS_SUMMARY", summary)));
+                .then(async () => await this.sendBotResponse(i18n.__("BOT_POINTS_SUMMARY", summary)));
             }));
         } else {
-          await this.sendJinaResponse(i18n.__("ANORAK_SAVE_FOR_LATER"))
+          await this.sendBotResponse(i18n.__("BOT_SAVE_FOR_LATER"))
             .then(() => this.awaitSuggestionChoice([i18n.__("SUGGESTION_YES"), i18n.__("SUGGESTION_NO")]))
             .then((saveForLater) => {
               if (saveForLater === i18n.__("SUGGESTION_YES")) {
                 Meteor.call("content/saveForLater", link.id, async (error) => {
-                  await this.sendJinaResponse(i18n.__("ANORAK_SAVED_FOR_LATER"));
+                  await this.sendBotResponse(i18n.__("BOT_SAVED_FOR_LATER"));
                 });
               }
             });
         }
       })
-      .then(() => this.sendJinaResponse(i18n.__("KEEP_LEARNING"), { extraDelay: 500 }))
+      .then(() => this.sendBotResponse(i18n.__("KEEP_LEARNING"), { extraDelay: 500 }))
       .then(() => this.awaitSuggestionChoice([
         i18n.__("SUGGESTION_YES"),
         i18n.__("SUGGESTION_CALL_IT_A_DAY")
@@ -890,9 +896,9 @@ class Chat extends Component {
           return this.getRandomSkill()
             .then((skill) => this.displayDiscover(this.state.latestDiscover.type, skill));
         } else if (choice.includes(i18n.__("SUGGESTION_CALL_IT_A_DAY"))) {
-          return this.sendJinaResponse(i18n.__("BYE"));
+          return this.sendBotResponse(i18n.__("BYE"));
         } else {
-          return this.sendJinaResponse(i18n.__("ANORAK_UNDERSTANDING_ERROR"));
+          return this.sendBotResponse(i18n.__("BOT_UNDERSTANDING_ERROR"));
         }
       });
   };
@@ -936,13 +942,13 @@ class Chat extends Component {
     if (SavedForLater.findOne({ content: id })) {
       Meteor.call("removeSavedForLaterContent", id, (error, result) => {
         if (error) {
-          this.sendJinaResponse(error);
+          this.sendBotResponse(error);
         }
       });
     } else {
       Meteor.call("content/saveForLater", id, (error, result) => {
         if (error) {
-          this.sendJinaResponse(error);
+          this.sendBotResponse(error);
         }
       });
     }

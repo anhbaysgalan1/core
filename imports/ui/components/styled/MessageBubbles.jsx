@@ -47,7 +47,7 @@ export const Bubble = styled.div`
   
   ${props => props.suggestion && `cursor: pointer; `};
   
-  ${props => props.link && `max-width: 51vw;` };
+  ${props => props.link && `max-width: 17rem;` };
   
   &::before {
     content: "";

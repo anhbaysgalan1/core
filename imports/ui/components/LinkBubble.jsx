@@ -62,6 +62,8 @@ class LinkBubble extends Component {
       if (this.state.liked && this.state.disliked) {
         this.setState({ disliked: false });
       }
+
+      Meteor.call("content/like", this.props.link);
     });
   };
 
@@ -70,6 +72,8 @@ class LinkBubble extends Component {
       if (this.state.disliked && this.state.liked) {
         this.setState({ liked: false });
       }
+
+      Meteor.call("content/dislike", this.props.link);
     });
   };
 

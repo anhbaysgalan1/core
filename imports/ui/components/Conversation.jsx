@@ -146,7 +146,7 @@ class Conversation extends Component {
         {messages.map((message, index) => this.renderMessage(message, index))}
         {showCategoryPicker && <CategoryCarousel onPickingOver={onPickingOver}/>}
         {suggestionComponents}
-        {botIsTyping && <BotIsTyping>{i18n.__("ANORAK_IS_TYPING")}</BotIsTyping>}
+        {botIsTyping && <BotIsTyping>{i18n.__("BOT_IS_TYPING")}</BotIsTyping>}
       </ConversationWrapper>
     );
   }

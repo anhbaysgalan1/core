@@ -45,7 +45,7 @@ const Icon = styled.i`
   }
 `;
 
-const Anorak = styled.img`
+const Bot = styled.img`
   display: ${props => props.visible ? `block` : `none`};
   width: 3rem;
 `;
@@ -66,7 +66,7 @@ class Header extends Component {
 
     return (
       <HeaderWrapper>
-        <Anorak src={`/anorak.png`} visible={currentPane === "chat"} />
+        <Bot src={`/anorak.png`} visible={currentPane === "chat"} />
         <Switch>
           <StyledLink to="/savedForLater">
             <Icon
