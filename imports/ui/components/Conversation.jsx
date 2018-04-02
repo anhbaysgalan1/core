@@ -29,7 +29,7 @@ const ConversationWrapper = styled.section`
   
   
   @media (min-width: 636px) {
-    width: 500px;
+    width: 427px;
     max-height: 72vh;
   }
 `;

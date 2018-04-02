@@ -10,7 +10,7 @@ const MessageBoxAndSuggestions = styled.div`
   width: 100%;
   
   @media (min-width: 636px) {
-    width: 500px;
+    width: 427px;
   }
 `;
 
