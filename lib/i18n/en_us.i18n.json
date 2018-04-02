@@ -75,8 +75,8 @@
   "NO_CONTENT_IN_CATEGORY": "Ah, sadly I don't have any {$type} in {$skill} yet!",
   "CONTINUE_DISCOVER_PROGRAM": "Continue",
   "CHANGE_CATEGORY": "Next category",
-  "START_OVER": "Start over",
-  "KEEP_GOING": "Continue",
+  "START_OVER": "Discover",
+  "KEEP_GOING": "More",
   "CONTENT_OVER": "Wonderful! It's best to take breaks every once in a while! Come back in a few hours. ⏳",
   "CONTENT_OVER_PRECISE": "You've learned enough for now! Come back later.",
   "KEEP_LEARNING": "Do you want to keep learning?",
@@ -84,6 +84,6 @@
   "BYE": "Until next time {$userName}!",
   "BOT_REGISTRATION_CATEGORY_PICK": "Here are some of the learning categories I have in mind, choose the six you are most interested in?",
   "GET_BACK_TO_DISCOVER": "I'm done searching",
-  "BEFORE_SHOWING_SEARCH_RESULTS": "Here's what I've found under {$term}:",
+  "BEFORE_SHOWING_SEARCH_RESULTS": "In {$term}...",
   "SEARCH_NO_RESULT": "I am terribly sorry, I've come back empty handed..."
 }
