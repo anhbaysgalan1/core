@@ -58,7 +58,7 @@ const Title = styled.h3`
 
 
 const Thumbnail = styled.img`  
-  max-width: 30vw;
+  max-width: 180px;
   
   margin-left: 2rem;
 `;
@@ -68,9 +68,9 @@ const BackButton = styled.button`
   
   font-size: 1rem;
   
-  position: absolute;
+  position: fixed;
   left: 1rem;
-  top: -52px;
+  top: 2.8rem;
   
   z-index: 10;
   
