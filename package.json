@@ -23,6 +23,7 @@
     "classnames": "^2.2.5",
     "core-js": "^2.5.3",
     "country-list": "^1.1.0",
+    "device-detect": "^1.0.7",
     "font-awesome": "^4.7.0",
     "history": "^3.0.0",
     "html-entities": "^1.2.1",

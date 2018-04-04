@@ -90,7 +90,7 @@ Meteor.methods({
     const mysql = await import("promise-mysql");
 
     const userId = Meteor.userId();
-    const platformId = 1;
+    const { platformId } = data || 4; // 4 is unknown platform id
     const { sessionId } = data || "";
     const { contentId } = data || "";
     const { durationSeconds } = data || 0;

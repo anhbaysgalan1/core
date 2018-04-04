@@ -72,7 +72,7 @@
   "BOT_REGISTRATION_WELCOME_3": "Are you ready?",
   "SUGGESTION_I_M_READY": "I’m ready",
   "BEFORE_SHOWING_CONTENT": "Here's what I have in {$skill}!",
-  "NO_CONTENT_IN_CATEGORY": "Ah, sadly I don't have any {$type} in {$skill} yet!",
+  "NO_CONTENT_IN_CATEGORY": "Nothing in {$skill}...",
   "CONTINUE_DISCOVER_PROGRAM": "Continue",
   "CHANGE_CATEGORY": "Next category",
   "START_OVER": "Discover",

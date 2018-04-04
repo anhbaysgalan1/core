@@ -96,15 +96,69 @@ Meteor.methods({
     return results;
   },
 
-  "content/like": (content) => {
-    check(content, Object);
+  "content/like": async (data) => {
+    check(data, Object);
 
-    console.log("Like", content);
+    const mysql = await import("promise-mysql");
+
+    console.log("Like", data);
+
+    const userId = Meteor.userId();
+    const { platformId } = data || 4; // Unknown platform by default
+    const { sessionId } = data || "";
+    const { contentId } = data || "";
+    const { eventStartTime } = data || 0;
+
+    let connection;
+
+    mysql.createConnection(Meteor.settings.mysql)
+      .then((connectionObject) => connection = connectionObject)
+      .then(() => connection.query(mysql.format(`
+        CALL put_ud_into_raw_intake(?,?,?,?,?,?,?,?,?)
+      `), [
+        sessionId,
+        userId,
+        platformId,
+        contentId,
+        0, // Event duration
+        eventStartTime,
+        2, // Event type "Rating"
+        "Like",
+        1 // Liking
+      ]))
+      .then(() => connection.end());
   },
 
-  "content/dislike": (content) => {
-    check(content, Object);
+  "content/dislike": async (data) => {
+    check(data, Object);
 
-    console.log("Dislike", content);
+    const mysql = await import("promise-mysql");
+
+    console.log("Dislike", data);
+
+    const userId = Meteor.userId();
+    const { platformId } = data || 4; // Unknown platform by default
+    const { sessionId } = data || "";
+    const { contentId } = data || "";
+    const { eventStartTime } = data || 0;
+
+    let connection;
+
+    mysql.createConnection(Meteor.settings.mysql)
+      .then((connectionObject) => connection = connectionObject)
+      .then(() => connection.query(mysql.format(`
+        CALL put_ud_into_raw_intake(?,?,?,?,?,?,?,?,?)
+      `), [
+        sessionId,
+        userId,
+        platformId,
+        contentId,
+        0, // Event duration
+        eventStartTime,
+        2, // Event type "Rating"
+        "Dislike", // Event message
+        -1 // Disliking
+      ]))
+      .then(() => connection.end());
   }
 });
