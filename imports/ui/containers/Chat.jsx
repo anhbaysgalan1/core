@@ -1,10 +1,10 @@
 import { Meteor } from "meteor/meteor";
 import i18n from "meteor/universe:i18n";
 import { analytics } from "meteor/okgrow:analytics";
-
 import React, { Component } from "react";
 import { compose } from "react-komposer";
 
+import getPlatformId from "/lib/DeviceDetect";
 import { Conversation, MessageBox } from "../components";
 import { getCategoryBySlug } from "/imports/api/Category";
 import { SavedForLater } from "/imports/api/SavedForLater";
@@ -206,6 +206,8 @@ class Chat extends Component {
           console.dir("filteredContent", filteredContent);
 
           if (filteredContent.length < 1) {
+            this.sendBotResponse(i18n.__("NO_CONTENT_IN_CATEGORY", { skill }), { noDelay: true });
+
             return this.getRandomSkill().then((nextSkill) => this.displayDiscover(type, nextSkill));
           } else {
             if (Meteor.isProduction) {
@@ -879,7 +881,8 @@ class Chat extends Component {
       durationSeconds: 1,
       eventStartTime: new Date().toISOString().substr(0, 19).replace('T', ' '),
       eventTypeId: 1, // Open link
-      eventMessage: this.state.latestDiscover.type
+      eventMessage: this.state.latestDiscover.type,
+      platformId: getPlatformId()
     });
 
     this.sendBotResponse(i18n.__("BOT_DID_YOU_FINISH"))

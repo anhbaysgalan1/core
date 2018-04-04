@@ -2,8 +2,10 @@ import React, { Component } from "react";
 import Truncate from "react-truncate";
 import styled from "styled-components";
 import classnames from "classnames";
+import getPlatformId from "/lib/DeviceDetect";
 
 import { BubbleWrapper, Bubble } from "./styled";
+import {Meteor} from "meteor/meteor";
 
 const LinkWrapper = styled.a`
   color: black;
@@ -63,7 +65,12 @@ class LinkBubble extends Component {
         this.setState({ disliked: false });
       }
 
-      Meteor.call("content/like", this.props.link);
+      Meteor.call("content/like", {
+        sessionId: Meteor._localStorage.getItem("Meteor.loginToken"),
+        contentId: this.props.link.id,
+        eventStartTime: new Date().toISOString().substr(0, 19).replace('T', ' '),
+        platformId: getPlatformId()
+      });
     });
   };
 
@@ -73,7 +80,12 @@ class LinkBubble extends Component {
         this.setState({ liked: false });
       }
 
-      Meteor.call("content/dislike", this.props.link);
+      Meteor.call("content/dislike", {
+        sessionId: Meteor._localStorage.getItem("Meteor.loginToken"),
+        contentId: this.props.link.id,
+        eventStartTime: new Date().toISOString().substr(0, 19).replace('T', ' '),
+        platformId: getPlatformId()
+      });
     });
   };
 
