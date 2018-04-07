@@ -1,7 +1,7 @@
 
 App.info({
   id: 'com.jinaverse.undermind',
-  name: 'Undermind',
+  name: 'Undermind Atlas',
   description: 'Get custom recommendations among thousands of MOOCs.',
   author: 'Loan Laux',
   email: 'contact@loanlaux.fr',
@@ -43,13 +43,10 @@ App.icons({
 
 App.launchScreens({
   "android_mdpi_portrait": "resources/splashes/android_mdpi_portrait.png", // 320x480
-  "android_mdpi_landscape": "resources/splashes/android_mdpi_landscape.png", // 480x320
   "android_hdpi_portrait": "resources/splashes/android_hdpi_portrait.png", // 480x800
-  "android_hdpi_landscape": "resources/splashes/android_hdpi_landscape.png", // 800x480
   "android_xhdpi_portrait": "resources/splashes/android_xhdpi_portrait.png", // 720x1280
-  "android_xhdpi_landscape": "resources/splashes/android_xhdpi_landscape.png", // 1280x720
   "android_xxhdpi_portrait": "resources/splashes/android_xxhdpi_portrait.png", // 1080x1440
-  "android_xxhdpi_landscape": "resources/splashes/android_xxhdpi_landscape.png" // 1440x1080
+  "android_xxxhdpi_portrait": "resources/splashes/android_xxxhdpi_portrait.png" // 1280x1920
 });
 
 App.accessRule('http://*');
