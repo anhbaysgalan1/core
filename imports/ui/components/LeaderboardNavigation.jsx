@@ -12,6 +12,10 @@ const IconWrapper = styled.div`
   bottom: 4rem;
   left: 50%;
   transform: translateX(-50%);
+  
+  @media screen and (max-height: 590px) {
+    bottom: 1rem;
+  }
 `;
 
 const Icon = styled.img`
