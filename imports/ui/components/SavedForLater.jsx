@@ -60,6 +60,10 @@ const Title = styled.h3`
 const Thumbnail = styled.img`  
   max-width: 180px;
   
+  @media screen and (max-width: 375px) {
+    max-width: 100px;
+  }
+  
   margin-left: 2rem;
 `;
 
