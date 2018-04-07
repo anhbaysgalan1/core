@@ -422,7 +422,7 @@ class Chat extends Component {
     this.sendBotResponse(i18n.__("BOT_REGISTRATION_AGREE_TOC", {
       userName: this.state.userName
     }), {
-      link: "https://undermind.typeform.com/to/BJumJz"
+      link: "http://atlas.undermind.io/terms.html"
     })
       .then(() => this.awaitSuggestionChoice([
         i18n.__("SUGGESTION_AGREE"),
@@ -475,9 +475,9 @@ class Chat extends Component {
   });
 
   greetNewUser = () => {
-    this.sendBotResponse(i18n.__("BOT_REGISTRATION_WELCOME_1"))
+    this.sendBotResponse(i18n.__("BOT_REGISTRATION_WELCOME_1", { userName: this.state.userName }))
       .then(() => this.sendBotResponse(i18n.__("BOT_REGISTRATION_WELCOME_2")))
-      .then(() =>  this.sendBotResponse(i18n.__("BOT_REGISTRATION_WELCOME_3")))
+      .then(() => this.sendBotResponse(i18n.__("BOT_REGISTRATION_WELCOME_3")))
       .then(() => this.awaitSuggestionChoice([i18n.__("SUGGESTION_I_M_READY")]))
       .then(this.greet);
   };
@@ -554,12 +554,10 @@ class Chat extends Component {
       conversation,
       onSuggestionChoice,
       onReply,
-      isRecordingPassword,
-      isSearchMode
+      isRecordingPassword
     } = this.state;
 
     let typedMessage = this.state.typedMessage;
-    const searchTerm = typedMessage;
 
     this.setState({
       suggestions: [],
@@ -587,7 +585,7 @@ class Chat extends Component {
           Meteor._localStorage.setItem("contentOverUntil", currentDate.getTime() + 4 * 3600 * 1000);
         }
 
-        if (typedMessage.includes(i18n.__("CONTINUE_DISCOVER_PROGRAM") && this.state.latestDiscover)) {
+        if (typedMessage.includes(i18n.__("CONTINUE_DISCOVER_PROGRAM")) && this.state.latestDiscover) {
           this.displayDiscover(this.state.latestDiscover.type, this.state.latestDiscover.skill);
         } else if (typedMessage.includes(i18n.__("CHANGE_CATEGORY"))) {
           this.getRandomSkill().then((skill) => this.displayDiscover(this.state.latestDiscover.type, skill));
@@ -612,13 +610,6 @@ class Chat extends Component {
     }
 
     console.log("handleMessageSend onSuggestionChoice", onSuggestionChoice);
-
-    // if (isSearchMode &&
-    //   typeof typedMessage === "string" &&
-    //   !typedMessage.includes(i18n.__("CONTINUE_DISCOVER_PROGRAM")) &&
-    //   !typedMessage.includes(i18n.__("START_OVER"))) {
-    //   typedMessage = `Search for "${typedMessage}"`;
-    // }
 
     // Push message to conversation
     conversation.push({ sender: "me", text: typedMessage });

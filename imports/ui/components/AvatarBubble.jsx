@@ -8,6 +8,10 @@ const Avatar = styled.img`
   
   ${props => props.big && `max-height: 40vw;`}
   
+  @media screen and (min-width: 636px) {
+    max-height: 5rem;
+  }
+  
   cursor: pointer;
 `;
 
