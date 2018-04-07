@@ -70,6 +70,7 @@ const Select = styled.select`
   background: transparent;
   width: 100%;
   padding: .5rem 1rem;
+  -moz-appearance: none;
 `;
 
 const SelectWrapper = styled.div`
