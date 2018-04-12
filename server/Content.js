@@ -79,13 +79,7 @@ Meteor.methods({
 
     const connection = await mysql.createConnection(Meteor.settings.mysql);
 
-    const query = mysql.format(`
-      SELECT *
-      FROM cd_raw_intake 
-      WHERE title LIKE ?
-      ORDER BY RAND()
-      LIMIT 3
-    `, [`%${term}%`]);
+    const query = mysql.format(``, [`%${term}%`]);
 
     const results = await connection.query(query);
 

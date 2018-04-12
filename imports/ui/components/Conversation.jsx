@@ -144,7 +144,7 @@ class Conversation extends Component {
     return (
       <ConversationWrapper innerRef={(wrapper) => this.setRef(wrapper)}>
         {messages.map((message, index) => this.renderMessage(message, index))}
-        {showCategoryPicker && <CategoryCarousel onPickingOver={onPickingOver}/>}
+        {showCategoryPicker && <CategoryCarousel onPickingOver={onPickingOver} autoScroll={this.autoScroll}/>}
         {suggestionComponents}
         {botIsTyping && <BotIsTyping>{i18n.__("BOT_IS_TYPING")}</BotIsTyping>}
       </ConversationWrapper>
