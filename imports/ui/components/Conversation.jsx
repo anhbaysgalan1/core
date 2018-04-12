@@ -64,7 +64,7 @@ class Conversation extends Component {
   };
 
   autoScroll = () => {
-    if (this.conversationWrapper) {
+    if (typeof this.conversationWrapper === "object") {
       setTimeout(() => {
         this.conversationWrapper.scrollTop = this.conversationWrapper.scrollHeight;
       }, 200);
