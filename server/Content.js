@@ -79,7 +79,7 @@ Meteor.methods({
 
     const connection = await mysql.createConnection(Meteor.settings.mysql);
 
-    const query = mysql.format(``, [`%${term}%`]);
+    const query = mysql.format(`CALL get_cd_search(?)`, [`%${term}%`]);
 
     const results = await connection.query(query);
 
@@ -87,7 +87,7 @@ Meteor.methods({
 
     console.log(`Searched for ${term} with results`, results);
 
-    return results;
+    return results[0];
   },
 
   "content/like": async (data) => {

@@ -199,7 +199,7 @@ class Chat extends Component {
               link: row.content_link,
               image: row.thumbnail_link || "http://via.placeholder.com/150x100",
               community: row.source_name || "",
-              isSavedForLater: SavedForLater.findOne({ content: row.row_id })
+              isSavedForLater: SavedForLater.findOne({ content: row.content_id })
             }));
           }
 
@@ -521,15 +521,17 @@ class Chat extends Component {
       })
       .then((result) => {
         const filteredContent = result.map((row) => ({
-          id: row.row_id,
-          type: row.material_type,
-          categories: row.categories,
-          title: row.title,
-          link: row.link,
-          image: row.image || "http://via.placeholder.com/150x100",
-          community: row.community || "",
-          isSavedForLater: SavedForLater.findOne({ content: row.row_id })
+          id: row.content_id,
+          type: row.type_name,
+          categories: row.category_name,
+          title: row.content_title,
+          link: row.content_link,
+          image: row.thumbnail_link || "http://via.placeholder.com/150x100",
+          community: row.source_name || "",
+          isSavedForLater: SavedForLater.findOne({ content: row.content_id })
         }));
+
+        console.log("GOT RESULT FROM SEARCH", result);
 
         if (result.length > 0) {
           filteredContent.push(i18n.__("CONTINUE_DISCOVER_PROGRAM"));
