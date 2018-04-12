@@ -13,13 +13,13 @@ Meteor.methods({
     const categoryTypeQuery = mysql.format(`
       SELECT row_id
       FROM cd_type
-      WHERE name LIKE ?
+      WHERE ty_name LIKE ?
     `, [`%${category}%`]);
 
     const skillTypeQuery = mysql.format(`
       SELECT row_id
       FROM cd_category
-      WHERE name LIKE ?
+      WHERE ca_name LIKE ?
     `, [`%${skill}%`]);
 
     return mysql.createConnection(Meteor.settings.mysql)

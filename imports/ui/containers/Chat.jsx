@@ -156,7 +156,7 @@ class Chat extends Component {
               if (message.includes(i18n.__("VIDEO"))) {
                 this.displayDiscover("video", skill);
               } else if (message.includes(i18n.__("COURSE"))) {
-                this.displayDiscover("class", skill);
+                this.displayDiscover("course", skill);
               } else if (message.includes(i18n.__("ARTICLE"))) {
                 this.displayDiscover("article", skill);
               } else if (message.includes(i18n.__("LECTURE"))) {
@@ -621,7 +621,7 @@ class Chat extends Component {
         } else if (typedMessage.includes(i18n.__("ARTICLE"))) {
           this.displayDiscover("article", this.state.latestDiscover.skill);
         } else if (typedMessage.includes(i18n.__("COURSE"))) {
-          this.displayDiscover("class", this.state.latestDiscover.skill);
+          this.displayDiscover("course", this.state.latestDiscover.skill);
         }
       }
 

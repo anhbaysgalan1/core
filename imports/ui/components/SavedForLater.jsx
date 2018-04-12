@@ -106,7 +106,7 @@ const SavedForLater = ({ content, history, onDelete }) => (
   <Wrapper>
     <NavigationRow>
       <BackButton onClick={() => history.push("/")}><i className={"fa fa-chevron-left"} /></BackButton>
-      <NavigationTitle>Saved courses</NavigationTitle>
+      <NavigationTitle>Bookmarks</NavigationTitle>
     </NavigationRow>
     {content.length > 0 ?
       content.map((currentContent, index) => (
