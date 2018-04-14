@@ -23,7 +23,7 @@ class SavedForLater extends Component {
 
     this.setState({ content: stateContent });
 
-    Meteor.call("removeSavedForLaterContent", content.row_id);
+    Meteor.call("removeSavedForLaterContent", content.content_id);
   }
 
   render() {
