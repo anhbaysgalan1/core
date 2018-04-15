@@ -64,7 +64,7 @@ class Conversation extends Component {
   };
 
   autoScroll = () => {
-    if (this.conversationWrapper) {
+    if (typeof this.conversationWrapper === "object") {
       setTimeout(() => {
         this.conversationWrapper.scrollTop = this.conversationWrapper.scrollHeight;
       }, 200);
@@ -117,7 +117,6 @@ class Conversation extends Component {
 
   renderSuggestions = (suggestions) => suggestions.map((suggestion, index) => {
     if (typeof suggestion === "object" && suggestion.type && suggestion.type === "image") {
-      console.log("Suggestion is avatar", suggestion);
       return this.renderAvatar(suggestion, index, true);
     } else if (typeof suggestion === "object" && suggestion.link) {
       return this.renderLink(suggestion, index);
@@ -144,7 +143,7 @@ class Conversation extends Component {
     return (
       <ConversationWrapper innerRef={(wrapper) => this.setRef(wrapper)}>
         {messages.map((message, index) => this.renderMessage(message, index))}
-        {showCategoryPicker && <CategoryCarousel onPickingOver={onPickingOver}/>}
+        {showCategoryPicker && <CategoryCarousel onPickingOver={onPickingOver} autoScroll={this.autoScroll}/>}
         {suggestionComponents}
         {botIsTyping && <BotIsTyping>{i18n.__("BOT_IS_TYPING")}</BotIsTyping>}
       </ConversationWrapper>

@@ -31,8 +31,14 @@ Meteor.methods({
         return [];
       }
 
-      const query = `SELECT * FROM cd_raw_intake WHERE row_id IN (${contentIds})`;
-      const results = await connection.query(query);
+      let bookmark;
+      const results = [];
+
+      for (const bookmarkId of contentIds) {
+        bookmark = await connection.query(mysql.format(`CALL get_content_by_id(?)`, [`${bookmarkId}`]));
+
+        results.push(bookmark[0][0]); // Pushing the results part of the first (and only) item returned by MySQL
+      }
 
       connection.end();
 
