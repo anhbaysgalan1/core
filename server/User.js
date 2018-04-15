@@ -85,8 +85,6 @@ Meteor.methods({
   },
 
   "user/storeAnalyticData": async (data) => {
-    console.log("user/storeAnalyticData", data);
-
     const mysql = await import("promise-mysql");
 
     const userId = Meteor.userId();

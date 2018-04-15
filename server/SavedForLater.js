@@ -35,11 +35,7 @@ Meteor.methods({
       const results = [];
 
       for (const bookmarkId of contentIds) {
-        console.log(`Fetching ${bookmarkId}`);
-
         bookmark = await connection.query(mysql.format(`CALL get_content_by_id(?)`, [`${bookmarkId}`]));
-
-        console.log("Bookmark", bookmark);
 
         results.push(bookmark[0][0]); // Pushing the results part of the first (and only) item returned by MySQL
       }

@@ -8,16 +8,12 @@ class SavedForLater extends Component {
   constructor(props) {
     super();
 
-    console.log("SavedForLater.constructor");
-
     this.state = {
       content: props.content
     };
   }
 
   handleDeleteSavedCourse = (content, stateIndex) => {
-    console.log("handleDeleteSavedCourse", stateIndex);
-
     const stateContent = this.state.content;
     stateContent.splice(stateIndex, 1);
 
@@ -56,8 +52,6 @@ function getTrackerLoader(reactiveMapper) {
 
 async function dataLoader(props, onData) {
   const saveForLaterContent = await Meteor.callPromise("getSavedForLater");
-
-  console.log("Got da content!", saveForLaterContent);
 
   onData(null, {
     content: saveForLaterContent
