@@ -117,7 +117,6 @@ class Conversation extends Component {
 
   renderSuggestions = (suggestions) => suggestions.map((suggestion, index) => {
     if (typeof suggestion === "object" && suggestion.type && suggestion.type === "image") {
-      console.log("Suggestion is avatar", suggestion);
       return this.renderAvatar(suggestion, index, true);
     } else if (typeof suggestion === "object" && suggestion.link) {
       return this.renderLink(suggestion, index);

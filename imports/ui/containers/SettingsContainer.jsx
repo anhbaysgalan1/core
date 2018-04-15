@@ -30,9 +30,6 @@ class SettingsContainer extends Component {
   handleChangePassword = async (oldPassword, newPassword) => {
     const { Accounts } = await import("meteor/accounts-base");
 
-    console.log("oldPassword", oldPassword);
-    console.log("newPassword", newPassword);
-
     Accounts.changePassword(oldPassword, newPassword);
   };
 

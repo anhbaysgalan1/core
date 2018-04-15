@@ -151,15 +151,11 @@ class MessageBox extends Component {
   toggleMoreMenu = (event) => {
     event.preventDefault();
 
-    console.log("Toggle more menu");
-
     this.setState({ isMoreMenuOpen: !this.state.isMoreMenuOpen });
   };
 
   handleSearch = (event) => {
     event.preventDefault();
-
-    console.log(`MessageBox.handleSearch with term ${this.props.message}`, event);
 
     this.props.onSearch(this.props.message);
   };

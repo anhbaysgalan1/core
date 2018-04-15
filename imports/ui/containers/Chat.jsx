@@ -121,8 +121,6 @@ class Chat extends Component {
 
     const skillTitle = getCategoryBySlug(randomSkill).title;
 
-    console.log("getRandomSkill", getCategoryBySlug(randomSkill));
-
     if (this.state.latestDiscover && skillTitle === this.state.latestDiscover.skill) {
       return this.getRandomSkill();
     }
@@ -177,8 +175,6 @@ class Chat extends Component {
    */
 
   displayDiscover(type, skill) {
-    console.log(`displayDiscover(${type}, ${skill})`);
-
     this.setState({ lastSearchTerm: "" });
 
     if (Meteor._localStorage.getItem("contentOverUntil") &&
@@ -187,7 +183,6 @@ class Chat extends Component {
     } else {
       Meteor.callPromise("content/getRandomFromCategory", type, skill.split(" ")[0])
         .then((content) => {
-          console.log("MySQL data:", content);
           let filteredContent = [];
 
           if (content) {
@@ -224,8 +219,6 @@ class Chat extends Component {
               }
             });
 
-            console.log("BEFORE_SHOWING_CONTENT skill", skill);
-
             this.sendBotResponse(i18n.__("BEFORE_SHOWING_CONTENT", { skill }), { noDelay: true });
           }
 
@@ -239,8 +232,6 @@ class Chat extends Component {
   }
 
   registerUsernameIfNotTaken = (userName) => new Promise((resolve, reject) => {
-    console.log("registerUsernameIfNotTaken");
-
     this.setState({
       onReply: null,
       userName
@@ -248,12 +239,8 @@ class Chat extends Component {
 
     Meteor.call("user/doesUserExist", userName, (error, result) => {
       if (!error && result) {
-        console.log("registerUsernameIfNotTaken reject");
-
         reject();
       } else {
-        console.log("registerUsernameIfNotTaken resolve");
-
         resolve();
       }
     });
@@ -295,8 +282,6 @@ class Chat extends Component {
       .then(() => {
         // Username is available
 
-        console.log("pickUsername resolve()");
-
         if (oldResolve) {
           oldResolve();
         } else {
@@ -328,8 +313,6 @@ class Chat extends Component {
         i18n.__("SUGGESTION_GENDER_FEMALE")
       ]))
       .then((gender) => {
-        console.log("Gender picked", gender);
-
         this.setState({ gender });
 
         resolve();
@@ -343,8 +326,6 @@ class Chat extends Component {
 
   pickPassword = (reason = "", oldResolve = null) => new Promise((resolve, reject) => {
     let message;
-
-    console.log(`pickPassword(${reason}) with firstPassword.length ${this.state.firstPassword.length}`);
 
     switch (reason) {
       case "LENGTH":
@@ -390,10 +371,8 @@ class Chat extends Component {
           this.pickPassword("CONFIRM", oldResolve ? oldResolve : resolve);
         } else if (reason === "CONFIRM" && this.state.firstPassword === this.state.password) {
           if (oldResolve) {
-            console.log("oldResolve()");
             oldResolve(password);
           } else {
-            console.log("resolve()");
             resolve(password);
           }
         } else {
@@ -483,8 +462,6 @@ class Chat extends Component {
   };
 
   handleSearch = (term) => {
-    console.log("Search for", term);
-
     const { conversation } = this.state;
     conversation.push({ sender: "me", text: `Search for "${term}"` });
 
@@ -531,8 +508,6 @@ class Chat extends Component {
           isSavedForLater: SavedForLater.findOne({ content: row.content_id })
         }));
 
-        console.log("GOT RESULT FROM SEARCH", result);
-
         if (result.length > 0) {
           filteredContent.push(i18n.__("CONTINUE_DISCOVER_PROGRAM"));
         }
@@ -566,16 +541,11 @@ class Chat extends Component {
       lastMessage: typedMessage
     });
 
-    console.log("state lastSearchTerm", this.state.lastSearchTerm);
-    console.log("typedMessage", typedMessage);
-
     if (typedMessage.includes(i18n.__("CONTINUE_DISCOVER_PROGRAM")) ||
       typedMessage.includes(i18n.__("CHANGE_CATEGORY")) ||
       typedMessage.includes(i18n.__("START_OVER"))) {
-      console.log("Message is instruction");
 
       if (typedMessage.includes(i18n.__("CONTINUE_DISCOVER_PROGRAM")) && this.state.lastSearchTerm.length > 0) {
-        console.log("Calling handleSearch with", this.state.lastSearchTerm);
         return this.handleSearch(this.state.lastSearchTerm);
       }
 
@@ -611,8 +581,6 @@ class Chat extends Component {
       typedMessage = Array.prototype.map.call(typedMessage, () => "●");
     }
 
-    console.log("handleMessageSend onSuggestionChoice", onSuggestionChoice);
-
     // Push message to conversation
     conversation.push({ sender: "me", text: typedMessage });
 
@@ -633,8 +601,6 @@ class Chat extends Component {
     }
 
     if (onReply) {
-      console.log("Responding to awaitReply");
-
       this.setState({ typedMessage: "" });
 
       return onReply(typedMessage);
@@ -748,13 +714,9 @@ class Chat extends Component {
       .then((username) => {
         this.setState({ onReply: null });
 
-        console.log("username", username);
-
         Meteor.call("user/doesUserExist", username, (error, result) => {
           if (!error && result) {
             // If username exists, store it in state and resolve promise
-
-            console.log("username in Meteor.call", username);
 
             this.setState({ userName: username }, () => {
               if (oldResolve) {
@@ -797,8 +759,6 @@ class Chat extends Component {
           const { password } = this.state;
 
           this.setState({ onReply: null, isRecordingPassword: false });
-
-          console.log("password", password);
 
           Meteor.loginWithPassword(this.state.userName, password, (err) => {
             if (err) {
@@ -860,8 +820,6 @@ class Chat extends Component {
    */
 
   handleSuggestionClicked(event, message) {
-    console.log("handleSuggestionClicked", message);
-
     this.setState({ typedMessage: message.text, suggestions: [] }, () => {
       this.handleMessageSend(event);
     });
