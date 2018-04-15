@@ -93,8 +93,6 @@ const CategoryCarousel = ({ categories, checkedCategories, onCategoryClick }) =>
     nextArrow: <NextArrow />
   };
 
-  console.log("checkedCategories", checkedCategories);
-
   return (
     <div>
       <Slider {...settings}>

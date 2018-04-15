@@ -106,18 +106,18 @@ const SavedForLater = ({ content, history, onDelete }) => (
   <Wrapper>
     <NavigationRow>
       <BackButton onClick={() => history.push("/")}><i className={"fa fa-chevron-left"} /></BackButton>
-      <NavigationTitle>Saved courses</NavigationTitle>
+      <NavigationTitle>Bookmarks</NavigationTitle>
     </NavigationRow>
     {content.length > 0 ?
       content.map((currentContent, index) => (
         <ContentRow key={index}>
-          <Link href={"#"} onClick={() => window.open(currentContent.link, "_system")}>
+          <Link href={"#"} onClick={() => window.open(currentContent.content_link, "_system")}>
             <div>
-              <Community>{currentContent.community}</Community>
-              <Title>{currentContent.title}</Title>
+              <Community>{currentContent.source_name}</Community>
+              <Title>{currentContent.content_title}</Title>
             </div>
             <div>
-              <Thumbnail src={currentContent.image || "http://via.placeholder.com/150x100"} />
+              <Thumbnail src={currentContent.thumbnail_link || "http://via.placeholder.com/150x100"} />
             </div>
           </Link>
           <TrashButton onClick={() => onDelete(currentContent, index)}>

@@ -32,6 +32,10 @@ class CategoryCarouselContainer extends Component {
   };
 
   render() {
+    if (this.props.autoScroll) {
+      this.props.autoScroll();
+    }
+
     return (
       <CategoryCarousel
         categories={this.props.categories}

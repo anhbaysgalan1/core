@@ -33,7 +33,7 @@ export default class MainLayout extends React.Component {
             <Switch>
               <Route exact path="/" name="Chat" component={Chat} />
               <Route path="/profile" name="Profile" component={Profile} />
-              <Route path="/savedForLater" name="Saved for later" component={SavedForLater} />
+              <Route path="/savedForLater" name="Bookmarks" component={SavedForLater} />
               <Route path="/settings" name="Settings" component={Settings} />
               <Route name="404 Not Found" component={NotFound} />
             </Switch>

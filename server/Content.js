@@ -4,8 +4,6 @@ Meteor.methods({
   "content/getRandomFromCategory": async (category, skill) => {
     const mysql = await import("promise-mysql");
 
-    console.log(`content/getRandomFromCategory ${category} ${skill}`);
-
     let connection;
     let categoryId;
     let skillId;
@@ -13,13 +11,13 @@ Meteor.methods({
     const categoryTypeQuery = mysql.format(`
       SELECT row_id
       FROM cd_type
-      WHERE name LIKE ?
+      WHERE ty_name LIKE ?
     `, [`%${category}%`]);
 
     const skillTypeQuery = mysql.format(`
       SELECT row_id
       FROM cd_category
-      WHERE name LIKE ?
+      WHERE ca_name LIKE ?
     `, [`%${skill}%`]);
 
     return mysql.createConnection(Meteor.settings.mysql)
@@ -27,8 +25,6 @@ Meteor.methods({
       .then(() => connection.query(skillTypeQuery))
       .then((skillRow) => {
         if (skillRow[0] && skillRow[0].row_id) {
-          console.log("Skill type rows", skillRow[0].row_id);
-
           skillId = skillRow[0].row_id;
         } else {
           throw new Meteor.Error("skill-not-found", `Couldn't find skill matching ${skill}`);
@@ -37,17 +33,12 @@ Meteor.methods({
       .then(() => connection.query(categoryTypeQuery))
       .then((categoryRow) => {
         if (categoryRow[0] && categoryRow[0].row_id) {
-          console.log("Category type row", categoryRow[0].row_id);
-
           categoryId = categoryRow[0].row_id;
         } else {
           throw new Meteor.Error("category-not-found", `Couldn't find category matching ${category}`);
         }
       })
       .then(() => {
-        console.log("skillId", skillId);
-        console.log("categoryId", categoryId);
-
         const query = mysql.format(`
           CALL get_content_by_typeANDcat(?,?);
         `, [categoryId, skillId]);
@@ -55,8 +46,6 @@ Meteor.methods({
         return connection.query(query);
       })
       .then((results) => {
-        console.log("getRandomFromCategory results", results[0]);
-
         connection.end();
 
         return results[0]; // Because of raw MySQL data structure. Return empty array if undefined.
@@ -79,29 +68,19 @@ Meteor.methods({
 
     const connection = await mysql.createConnection(Meteor.settings.mysql);
 
-    const query = mysql.format(`
-      SELECT *
-      FROM cd_raw_intake 
-      WHERE title LIKE ?
-      ORDER BY RAND()
-      LIMIT 3
-    `, [`%${term}%`]);
+    const query = mysql.format(`CALL get_cd_search(?)`, [`%${term}%`]);
 
     const results = await connection.query(query);
 
     connection.end();
 
-    console.log(`Searched for ${term} with results`, results);
-
-    return results;
+    return results[0];
   },
 
   "content/like": async (data) => {
     check(data, Object);
 
     const mysql = await import("promise-mysql");
-
-    console.log("Like", data);
 
     const userId = Meteor.userId();
     const { platformId } = data || 4; // Unknown platform by default
@@ -133,8 +112,6 @@ Meteor.methods({
     check(data, Object);
 
     const mysql = await import("promise-mysql");
-
-    console.log("Dislike", data);
 
     const userId = Meteor.userId();
     const { platformId } = data || 4; // Unknown platform by default

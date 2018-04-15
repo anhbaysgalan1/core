@@ -1,13 +1,13 @@
 
 App.info({
   id: 'com.jinaverse.undermind',
-  name: 'Undermind Atlas',
+  name: 'Undermind',
   description: 'Get custom recommendations among thousands of MOOCs.',
   author: 'Loan Laux',
   email: 'contact@loanlaux.fr',
   website: 'http://loanlaux.fr',
-  version: "1.3",
-  buildNumber: '113000'
+  version: "1.3.1",
+  buildNumber: '113010'
 });
 
 App.setPreference("StatusBarBackgroundColor", "#0f90d1");
