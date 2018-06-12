@@ -256,3 +256,26 @@ test('requires userId on alias events', t => {
     })
   })
 })
+
+test('requires events to be < 32kb', t => {
+  t.throws(() => {
+    var event = {
+      type: 'track',
+      event: 'Did Something',
+      userId: 'banana',
+      properties: {}
+    }
+    for (var i = 0; i < 10000; i++) {
+      event.properties[i] = 'a'
+    }
+    validate(event)
+  }, 'Your message must be < 32kb.')
+
+  t.notThrows(() => {
+    validate({
+      type: 'track',
+      event: 'Did Something',
+      userId: 'banana'
+    })
+  })
+})

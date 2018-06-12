@@ -2,6 +2,9 @@ var type = require('component-type')
 var join = require('join-component')
 var assert = require('assert')
 
+// Segment messages can be a maximum of 32kb.
+var MAX_SIZE = 32 << 10
+
 module.exports = looselyValidateEvent
 
 /**
@@ -105,6 +108,10 @@ var genericValidationRules = {
 
 function validateGenericEvent (event) {
   assert(type(event) === 'object', 'You must pass a message object.')
+  var json = JSON.stringify(event)
+  // Strings are variable byte encoded, so json.length is not sufficient.
+  assert(Buffer.byteLength(json, 'utf8') < MAX_SIZE, 'Your message must be < 32kb.')
+
   for (var key in genericValidationRules) {
     var val = event[key]
     if (!val) continue
